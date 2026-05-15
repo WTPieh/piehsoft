@@ -76,7 +76,7 @@ export default async function ProjectPage({
             >
               <HeroBackground
                 brandColor={project.hero.glow}
-                shape="radial"
+                shape="sphere"
                 intensity={0.9}
                 noise={0.3}
                 softness={0.7}

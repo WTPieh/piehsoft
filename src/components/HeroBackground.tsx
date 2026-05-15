@@ -81,7 +81,7 @@ function deriveColors(brand: string, base: string): string[] {
 
 type Props = {
   brandColor?: string;
-  shape?: "corners" | "radial" | "ripple" | "edges";
+  shape?: "corners" | "ripple" | "wave" | "dots" | "truchet" | "blob" | "sphere";
   intensity?: number;
   noise?: number;
   softness?: number;
