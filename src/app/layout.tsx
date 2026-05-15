@@ -22,6 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://piehsoft.com"),
   title: "PiehSoft — Considered software.",
   description:
     "PiehSoft is a design and engineering studio that rebuilds iPhone apps and the AI systems that power them. Considered, end-to-end. Phoenix, AZ.",
