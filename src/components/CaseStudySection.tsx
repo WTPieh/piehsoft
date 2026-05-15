@@ -31,7 +31,7 @@ export function CaseStudySection({ section }: { section: CaseSection }) {
   return (
     <section
       id={section.id}
-      className="border-t border-border scroll-mt-28 py-20 sm:py-24"
+      className="border-t border-border scroll-mt-40 py-20 sm:py-24"
     >
       <div className="mx-auto max-w-6xl px-6 sm:px-10">{renderBody(section)}</div>
     </section>

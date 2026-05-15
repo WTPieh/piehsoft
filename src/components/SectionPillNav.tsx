@@ -41,24 +41,28 @@ export function SectionPillNav({ items }: { items: Item[] }) {
     const pill = scroller.querySelector<HTMLAnchorElement>(
       `a[data-id="${active}"]`
     );
-    if (pill) {
-      pill.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
-    }
+    if (!pill) return;
+    const target =
+      pill.offsetLeft - scroller.clientWidth / 2 + pill.clientWidth / 2;
+    scroller.scrollTo({ left: target, behavior: "smooth" });
   }, [active]);
 
   return (
     <div
-      className={`sticky top-20 z-40 mx-auto mt-6 w-fit max-w-[calc(100%-2rem)] transition-all duration-300 ${
-        hidden ? "opacity-0 -translate-y-2 pointer-events-none" : "opacity-100"
+      className={`sticky top-20 z-40 mx-auto mb-6 w-fit max-w-[calc(100%-2rem)] transition-opacity duration-300 ${
+        hidden ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >
       <nav
         ref={scrollerRef}
-        className="flex items-center gap-1 rounded-full border border-border-strong bg-background/85 backdrop-blur-md px-2 py-1.5 overflow-x-auto max-w-[calc(100vw-2rem)] no-scrollbar shadow-lg shadow-black/5"
+        className="flex items-center gap-1 rounded-full backdrop-blur-sm backdrop-saturate-150 px-2 py-1.5 overflow-x-auto max-w-[calc(100vw-2rem)] no-scrollbar"
+        style={{
+          background: "var(--glass-pill-bg)",
+          /* Refraction rim — top specular highlight following the curve,
+             matching the header's glass-rim treatment. */
+          boxShadow:
+            "inset 0 1px 0 var(--glass-rim-strong), inset 0 -1px 0 rgba(0,0,0,0.08), 0 6px 24px rgba(0,0,0,0.08)",
+        }}
         aria-label="Case study sections"
       >
         {items.map((item) => {

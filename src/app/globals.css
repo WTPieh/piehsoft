@@ -18,6 +18,7 @@
   --glass-rim-strong: rgba(60, 40, 20, 0.22);
   --glass-rim-mid: rgba(60, 40, 20, 0.14);
   --glass-rim-bloom: rgba(60, 40, 20, 0.06);
+  --glass-pill-bg: color-mix(in oklab, var(--background) 75%, transparent);
 }
 
 [data-theme="dark"] {
@@ -36,6 +37,7 @@
   --glass-rim-strong: rgba(255, 255, 255, 0.28);
   --glass-rim-mid: rgba(255, 255, 255, 0.18);
   --glass-rim-bloom: rgba(255, 255, 255, 0.08);
+  --glass-pill-bg: color-mix(in oklab, var(--background) 40%, transparent);
 }
 
 @theme inline {

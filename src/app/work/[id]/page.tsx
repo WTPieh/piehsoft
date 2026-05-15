@@ -43,8 +43,17 @@ export default async function ProjectPage({
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border">
-        <div className="relative mx-auto max-w-6xl px-6 sm:px-10 pt-24 pb-24">
+      <section className="relative border-b border-border -mt-16">
+        <HeroBackground
+          brandColor={project.hero.glow}
+          shape="wave"
+          intensity={0.05}
+          noise={0.35}
+          softness={1.0}
+          bleedBelow={340}
+          vignette={0.5}
+        />
+        <div className="relative mx-auto max-w-6xl px-6 sm:px-10 pt-40 pb-24">
           <Link
             href="/#work"
             className="font-mono-tag text-muted hover:text-foreground transition-colors"
@@ -62,32 +71,11 @@ export default async function ProjectPage({
           </div>
 
           <div className="relative mx-auto mt-12 w-full max-w-3xl aspect-[16/12]">
-            {/* Glow constrained to behind the image — soft circular falloff,
-                center shifted upward to sit behind the phones. */}
-            <div
-              aria-hidden
-              className="absolute -left-[50%] -right-[50%] -top-[70%] -bottom-[30%] pointer-events-none"
-              style={{
-                maskImage:
-                  "radial-gradient(circle at center, black 0%, transparent 55%)",
-                WebkitMaskImage:
-                  "radial-gradient(circle at center, black 0%, transparent 55%)",
-              }}
-            >
-              <HeroBackground
-                brandColor={project.hero.glow}
-                shape="sphere"
-                intensity={0.9}
-                noise={0.3}
-                softness={0.7}
-                vignette={0}
-              />
-            </div>
             <Image
               src={project.hero.image}
               alt={`${project.title} product render`}
               fill
-              className="relative object-contain"
+              className="object-contain"
               sizes="(min-width: 1024px) 768px, 90vw"
               priority
             />
@@ -95,47 +83,92 @@ export default async function ProjectPage({
         </div>
       </section>
 
-      {/* Pill nav */}
-      <SectionPillNav items={navItems} />
+      {/* Combined wrapper — framing region + content sections all share one
+          sticky context so the pill nav stays docked through every section. */}
+      <div className="relative pt-4">
+        {/* Glass strip blurring the hero's bleed, fading to solid bg.
+            Height must cover the hero's bleedBelow distance + buffer. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-[400px] pointer-events-none backdrop-blur-md backdrop-saturate-150 z-0"
+          style={{
+            maskImage:
+              "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-[400px] pointer-events-none z-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 0%, transparent 30%, var(--background) 100%)",
+          }}
+        />
+        {/* Refraction rim — theme-aware specular hairline at the glass edge */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-[2px] pointer-events-none z-[1]"
+          style={{
+            background:
+              "linear-gradient(to right, transparent 0%, var(--glass-rim-mid) 20%, var(--glass-rim-strong) 50%, var(--glass-rim-mid) 80%, transparent 100%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-x-0 top-[2px] h-[6px] pointer-events-none z-[1]"
+          style={{
+            background:
+              "linear-gradient(to bottom, var(--glass-rim-bloom) 0%, transparent 100%)",
+            filter: "blur(2px)",
+          }}
+        />
 
-      {/* Framing + metadata */}
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-6 sm:px-10 py-16 sm:py-20">
-          <p className="text-2xl sm:text-3xl font-display max-w-4xl leading-snug">
-            {project.oneLineFraming}
-          </p>
+        {/* Pill nav — DIRECT child of the wrapper so its sticky range spans
+            the wrapper's full height (framing + every section below).
+            Wrapping it in another div would clip the sticky pin to that div's box. */}
+        <SectionPillNav items={navItems} />
 
-          <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-y-6 gap-x-10 border-t border-border pt-8">
-            {[
-              { l: "Timeline", v: project.metadata.timeline },
-              { l: "Role", v: project.metadata.role },
-              { l: "Technology", v: project.metadata.technology },
-              { l: "Platform", v: project.metadata.platform },
-            ].map((m) => (
-              <div key={m.l}>
-                <div className="font-mono-tag text-subtle">{m.l}</div>
-                <div className="mt-2 text-sm leading-snug">{m.v}</div>
-              </div>
-            ))}
-          </div>
+        {/* Framing content (one-liner + metadata + metrics) */}
+        <section className="relative z-10 border-b border-border">
+          <div className="mx-auto max-w-6xl px-6 sm:px-10 pt-10 pb-16 sm:pb-20">
+            <p className="text-2xl sm:text-3xl font-display max-w-4xl leading-snug">
+              {project.oneLineFraming}
+            </p>
 
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-10 border-t border-border pt-10">
-            {project.metrics.map((m) => (
-              <div key={m.label}>
-                <div className="font-display text-4xl sm:text-5xl leading-none tracking-tight">
-                  {m.value}
+            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-y-6 gap-x-10 border-t border-border pt-8">
+              {[
+                { l: "Timeline", v: project.metadata.timeline },
+                { l: "Role", v: project.metadata.role },
+                { l: "Technology", v: project.metadata.technology },
+                { l: "Platform", v: project.metadata.platform },
+              ].map((m) => (
+                <div key={m.l}>
+                  <div className="font-mono-tag text-subtle">{m.l}</div>
+                  <div className="mt-2 text-sm leading-snug">{m.v}</div>
                 </div>
-                <div className="font-mono-tag text-subtle mt-3">{m.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              ))}
+            </div>
 
-      {/* Sections — each one renders its own materially-different layout */}
-      {project.sections.map((section) => (
-        <CaseStudySection key={section.id} section={section} />
-      ))}
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-10 border-t border-border pt-10">
+              {project.metrics.map((m) => (
+                <div key={m.label}>
+                  <div className="font-display text-4xl sm:text-5xl leading-none tracking-tight">
+                    {m.value}
+                  </div>
+                  <div className="font-mono-tag text-subtle mt-3">{m.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Sections — each renders its own layout, all under the same sticky scope */}
+        {project.sections.map((section) => (
+          <CaseStudySection key={section.id} section={section} />
+        ))}
+      </div>
 
       {/* Up next + contact */}
       <section className="border-t border-border">

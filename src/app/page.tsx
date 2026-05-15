@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative border-b border-border overflow-x-clip -mt-16">
+      <section className="relative border-b border-border -mt-16">
         <HeroBackground inflate={0.25} bleedBelow={240} />
         <div className="relative z-10 mx-auto max-w-6xl px-6 sm:px-10 pt-36 pb-24 sm:pt-48 sm:pb-32">
           <p className="font-mono-tag text-muted mb-8">
@@ -65,10 +65,8 @@ export default function HomePage() {
       </section>
 
       {/* Featured work */}
-      <section
-        id="work"
-        className="relative border-b border-border overflow-x-clip"
-      >
+      <section id="work" className="relative border-b border-border">
+
         {/* Glass strip blurring the hero's bleed, fading to solid bg */}
         <div
           aria-hidden
