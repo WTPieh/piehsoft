@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>PiehSoft</title>
+  <style>
+    .tile { fill: #f5f3ef; }
+    .ink { fill: #1a1a1a; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: transparent; }
+      .ink { fill: #f5f3ef; }
+    }
+  </style>
+  <rect class="tile" width="32" height="32" rx="6"/>
+  <text class="ink"
+        x="16" y="16"
+        text-anchor="middle"
+        dominant-baseline="central"
+        font-family="'Instrument Serif', 'ui-serif', Georgia, serif"
+        font-size="24"
+        font-weight="400">P</text>
+</svg>

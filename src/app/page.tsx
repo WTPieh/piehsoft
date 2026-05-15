@@ -78,7 +78,7 @@ export default function HomePage() {
 
       {/* About */}
       <section id="about" className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-6 sm:px-10 py-24 grid grid-cols-12 gap-10">
+        <div className="mx-auto max-w-6xl px-6 sm:px-10 py-24 grid grid-cols-12 gap-y-10 sm:gap-x-10">
           <div className="col-span-12 sm:col-span-4">
             <p className="font-mono-tag text-subtle">About</p>
             <h2 className="font-display text-4xl sm:text-5xl tracking-tight mt-3">

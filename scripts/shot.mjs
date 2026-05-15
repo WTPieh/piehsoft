@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { chromium } from "playwright";
+import { chromium, devices } from "playwright";
 import { mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
@@ -14,15 +14,24 @@ const fullPage = flags.includes("--full");
 const theme = flags.includes("--light") ? "light" : "dark";
 const sectionFlag = flags.find((f) => f.startsWith("--section="));
 const section = sectionFlag ? sectionFlag.slice("--section=".length) : null;
-const viewport = { width: 1440, height: 900 };
+const isMobile = flags.includes("--mobile");
+const viewportMode = flags.includes("--viewport");
+
+const desktopViewport = { width: 1440, height: 900 };
+const mobileViewport = { width: 390, height: 844 };
 
 const out = resolve(process.cwd(), outArg);
 await mkdir(dirname(out), { recursive: true });
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext({
-  viewport,
+  viewport: isMobile ? mobileViewport : desktopViewport,
   deviceScaleFactor: 2,
+  isMobile,
+  hasTouch: isMobile,
+  userAgent: isMobile
+    ? devices["iPhone 14 Pro"].userAgent
+    : undefined,
   colorScheme: theme === "light" ? "light" : "dark",
 });
 const page = await ctx.newPage();
@@ -37,18 +46,35 @@ await page.goto(url, { waitUntil: "networkidle" });
 await page.waitForTimeout(400);
 
 if (section) {
-  const el = await page.$(`#${section}`);
-  if (el) {
-    await el.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    await el.screenshot({ path: out });
+  if (viewportMode) {
+    await page.evaluate(
+      (id) => document.getElementById(id)?.scrollIntoView({ block: "start" }),
+      section
+    );
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: out });
   } else {
-    console.error(`Section #${section} not found, falling back to viewport`);
-    await page.screenshot({ path: out, fullPage });
+    const el = await page.$(`#${section}`);
+    if (el) {
+      await el.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      await el.screenshot({ path: out });
+    } else {
+      console.error(`Section #${section} not found, falling back to viewport`);
+      await page.screenshot({ path: out, fullPage });
+    }
   }
 } else {
   await page.screenshot({ path: out, fullPage });
 }
+
+// Report page dimensions vs viewport — useful for catching horizontal overflow
+const dims = await page.evaluate(() => ({
+  bodyWidth: document.body.scrollWidth,
+  htmlWidth: document.documentElement.scrollWidth,
+  viewport: window.innerWidth,
+}));
+console.log(`viewport=${dims.viewport} body=${dims.bodyWidth} html=${dims.htmlWidth}`);
 
 await browser.close();
 console.log(out);

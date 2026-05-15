@@ -15,7 +15,7 @@ export function ProjectCard({
       href={`/work/${project.id}`}
       className="group block border-t border-border py-14 transition-colors"
     >
-      <div className="grid grid-cols-12 gap-6 items-center">
+      <div className="grid grid-cols-12 gap-y-8 sm:gap-x-6 items-center">
         <div className="col-span-12 sm:col-span-1 font-mono-tag text-subtle pt-1">
           {String(index + 1).padStart(2, "0")}
         </div>

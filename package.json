@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "shot": "node scripts/shot.mjs",
-    "deploy:preview": "next build && wrangler pages deploy out --project-name=piehsoft --branch=preview",
-    "deploy": "next build && wrangler pages deploy out --project-name=piehsoft --branch=main"
+    "build:static": "STATIC_EXPORT=1 next build",
+    "deploy:preview": "STATIC_EXPORT=1 next build && wrangler pages deploy out --project-name=piehsoft --branch=preview",
+    "deploy": "STATIC_EXPORT=1 next build && wrangler pages deploy out --project-name=piehsoft --branch=main"
   },
   "dependencies": {
     "@icons-pack/react-simple-icons": "^13.13.0",

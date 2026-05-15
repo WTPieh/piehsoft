@@ -1,0 +1,10 @@
+{
+  "name": "PiehSoft",
+  "short_name": "PiehSoft",
+  "icons": [
+    { "src": "/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "theme_color": "#f5f3ef",
+  "background_color": "#f5f3ef",
+  "display": "minimal-ui"
+}

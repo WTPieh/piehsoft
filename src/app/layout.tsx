@@ -25,6 +25,7 @@ export const metadata: Metadata = {
   title: "PiehSoft — Native iOS & AI systems, designed and built end-to-end",
   description:
     "PiehSoft is the studio of William Pieh. iPhone apps, AI systems, and data infrastructure for B2B teams whose software has outgrown its original code.",
+  manifest: "/site.webmanifest",
 };
 
 const themeScript = `

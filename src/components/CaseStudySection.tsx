@@ -70,7 +70,7 @@ function renderBody(section: CaseSection) {
   switch (section.kind) {
     case "prose":
       return (
-        <div className="grid grid-cols-12 gap-10">
+        <div className="grid grid-cols-12 gap-y-10 sm:gap-x-10">
           <div className="col-span-12 sm:col-span-4">
             <SectionHeader label={section.label} heading={section.heading} />
           </div>
@@ -168,8 +168,8 @@ function renderBody(section: CaseSection) {
 
     case "code":
       return (
-        <div className="grid grid-cols-12 gap-x-10 gap-y-8">
-          <div className="col-span-12 sm:col-span-5">
+        <div className="grid grid-cols-12 gap-y-8 sm:gap-x-10">
+          <div className="col-span-12 sm:col-span-5 min-w-0">
             <SectionHeader label={section.label} heading={section.heading} />
             <div className="mt-6 space-y-5 text-base text-muted leading-relaxed">
               {section.lede.split("\n\n").map((p, i) => (
@@ -177,7 +177,7 @@ function renderBody(section: CaseSection) {
               ))}
             </div>
           </div>
-          <div className="col-span-12 sm:col-span-7 space-y-5">
+          <div className="col-span-12 sm:col-span-7 min-w-0 space-y-5">
             <div className="relative rounded-md bg-surface-2/60 overflow-hidden">
               <span className="absolute top-3 right-4 font-mono text-[10px] tracking-widest uppercase text-subtle">
                 {section.language}
@@ -444,7 +444,7 @@ function renderBody(section: CaseSection) {
       const proseStart = imageSide === "right" ? "sm:col-start-1" : "sm:col-start-7";
       const imageStart = imageSide === "right" ? "sm:col-start-7" : "sm:col-start-1";
       return (
-        <div className="grid grid-cols-12 gap-x-10 gap-y-8 items-center">
+        <div className="grid grid-cols-12 gap-y-8 sm:gap-x-10 items-center">
           <div className={`col-span-12 sm:col-span-6 ${proseStart}`}>
             <SectionHeader label={section.label} heading={section.heading} />
             <div className="mt-6 space-y-5 text-lg text-foreground/90 leading-relaxed">

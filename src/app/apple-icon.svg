@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <title>PiehSoft</title>
+  <rect fill="#f5f3ef" width="180" height="180" rx="36"/>
+  <text fill="#1a1a1a"
+        x="90" y="90"
+        text-anchor="middle"
+        dominant-baseline="central"
+        font-family="'Instrument Serif', 'ui-serif', Georgia, serif"
+        font-size="130"
+        font-weight="400">P</text>
+</svg>
