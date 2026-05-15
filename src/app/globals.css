@@ -1,26 +1,95 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fbfaf7;
+  --surface: #ffffff;
+  --surface-2: #f3f1ec;
+  --foreground: #1a1a1a;
+  --muted: #6b6b6b;
+  --subtle: #9a9a96;
+  --border: #e5e2dc;
+  --border-strong: #c9c5bc;
+  --accent: #1a1a1a;
+  --accent-fg: #fbfaf7;
+}
+
+[data-theme="dark"] {
+  --background: #0f0f0e;
+  --surface: #161614;
+  --surface-2: #1d1d1b;
+  --foreground: #f1ede4;
+  --muted: #9c9a92;
+  --subtle: #6c6a64;
+  --border: #2a2a27;
+  --border-strong: #3a3a36;
+  --accent: #f1ede4;
+  --accent-fg: #0f0f0e;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --font-serif: var(--font-instrument-serif);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--background);
+  color: var(--foreground);
+  color-scheme: light;
+}
+
+[data-theme="dark"] html,
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.font-display {
+  font-family: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  font-feature-settings: "ss01";
+  letter-spacing: -0.01em;
+}
+
+.font-mono-tag {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hairline {
+  height: 1px;
+  background: var(--border);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
