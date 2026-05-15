@@ -22,9 +22,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PiehSoft — Native iOS & AI systems, designed and built end-to-end",
+  title: "PiehSoft — Considered software.",
   description:
-    "PiehSoft is the studio of William Pieh. iPhone apps, AI systems, and data infrastructure for B2B teams whose software has outgrown its original code.",
+    "PiehSoft is a design and engineering studio that rebuilds iPhone apps and the AI systems that power them. Considered, end-to-end. Phoenix, AZ.",
   manifest: "/site.webmanifest",
 };
 
@@ -58,7 +58,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 pt-16">{children}</main>
         <Footer />
       </body>
     </html>

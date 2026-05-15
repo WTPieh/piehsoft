@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BrandGlow } from "@/components/BrandGlow";
+import { HeroBackground } from "@/components/HeroBackground";
 import { CaseStudySection } from "@/components/CaseStudySection";
 import { SectionPillNav } from "@/components/SectionPillNav";
 import { getProject, projects } from "@/lib/projects";
@@ -44,7 +44,6 @@ export default async function ProjectPage({
     <>
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border">
-        <BrandGlow color={project.hero.glow} intensity={0.35} />
         <div className="relative mx-auto max-w-6xl px-6 sm:px-10 pt-24 pb-24">
           <Link
             href="/#work"
@@ -63,11 +62,32 @@ export default async function ProjectPage({
           </div>
 
           <div className="relative mx-auto mt-12 w-full max-w-3xl aspect-[16/12]">
+            {/* Glow constrained to behind the image — soft circular falloff,
+                center shifted upward to sit behind the phones. */}
+            <div
+              aria-hidden
+              className="absolute -left-[50%] -right-[50%] -top-[70%] -bottom-[30%] pointer-events-none"
+              style={{
+                maskImage:
+                  "radial-gradient(circle at center, black 0%, transparent 55%)",
+                WebkitMaskImage:
+                  "radial-gradient(circle at center, black 0%, transparent 55%)",
+              }}
+            >
+              <HeroBackground
+                brandColor={project.hero.glow}
+                shape="radial"
+                intensity={0.9}
+                noise={0.3}
+                softness={0.7}
+                vignette={0}
+              />
+            </div>
             <Image
               src={project.hero.image}
               alt={`${project.title} product render`}
               fill
-              className="object-contain"
+              className="relative object-contain"
               sizes="(min-width: 1024px) 768px, 90vw"
               priority
             />

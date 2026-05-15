@@ -13,6 +13,11 @@
   --border-strong: #c9c5bc;
   --accent: #1a1a1a;
   --accent-fg: #fbfaf7;
+  /* Glass refraction rim: subtle dark specular in light mode */
+  --glass-rim-rgb: 60, 40, 20;
+  --glass-rim-strong: rgba(60, 40, 20, 0.22);
+  --glass-rim-mid: rgba(60, 40, 20, 0.14);
+  --glass-rim-bloom: rgba(60, 40, 20, 0.06);
 }
 
 [data-theme="dark"] {
@@ -26,6 +31,11 @@
   --border-strong: #3a3a36;
   --accent: #f1ede4;
   --accent-fg: #0f0f0e;
+  /* Glass refraction rim: bright specular in dark mode */
+  --glass-rim-rgb: 255, 255, 255;
+  --glass-rim-strong: rgba(255, 255, 255, 0.28);
+  --glass-rim-mid: rgba(255, 255, 255, 0.18);
+  --glass-rim-bloom: rgba(255, 255, 255, 0.08);
 }
 
 @theme inline {

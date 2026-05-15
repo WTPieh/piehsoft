@@ -178,6 +178,7 @@ function renderBody(section: CaseSection) {
             </div>
           </div>
           <div className="col-span-12 sm:col-span-7 min-w-0 space-y-5">
+            <p className="font-mono-tag text-subtle">{section.caption}</p>
             <div className="relative rounded-md bg-surface-2/60 overflow-hidden">
               <span className="absolute top-3 right-4 font-mono text-[10px] tracking-widest uppercase text-subtle">
                 {section.language}
@@ -186,7 +187,6 @@ function renderBody(section: CaseSection) {
                 <code>{section.code}</code>
               </pre>
             </div>
-            <p className="font-mono-tag text-subtle">↳ {section.caption}</p>
             {section.followUp && (
               <p className="mt-2 text-sm text-muted leading-relaxed italic">
                 <span className="not-italic font-mono-tag text-subtle mr-2">
@@ -489,7 +489,7 @@ function contrastFor(hex: string): string {
   const g = parseInt(v.slice(2, 4), 16);
   const b = parseInt(v.slice(4, 6), 16);
   const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return lum > 0.55 ? "#111" : "#f5f2ec";
+  return lum > 0.7 ? "#111" : "#f5f2ec";
 }
 
 function ImageBlock({

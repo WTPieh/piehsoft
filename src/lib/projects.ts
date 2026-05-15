@@ -108,7 +108,7 @@ export const projects: Project[] = [
   {
     id: "hornscore",
     title: "HornScore",
-    tagline: "Rescued from legacy chaos",
+    tagline: "5,000 hunters, zero security debt",
     summary: "5,000+ users, security overhaul, modern iOS rebuild.",
     hero: {
       image: "/projects/hornscore/photos/hero.png",

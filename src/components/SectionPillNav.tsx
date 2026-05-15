@@ -52,7 +52,7 @@ export function SectionPillNav({ items }: { items: Item[] }) {
 
   return (
     <div
-      className={`sticky top-4 z-40 mx-auto w-fit max-w-[calc(100%-2rem)] transition-all duration-300 ${
+      className={`sticky top-20 z-40 mx-auto mt-6 w-fit max-w-[calc(100%-2rem)] transition-all duration-300 ${
         hidden ? "opacity-0 -translate-y-2 pointer-events-none" : "opacity-100"
       }`}
     >
