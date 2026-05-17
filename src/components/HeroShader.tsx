@@ -28,6 +28,7 @@ export type HeroParams = {
   inflate: number;
   bleedBelow: number;
   frame: number;
+  fallbackKey: string;
 };
 
 // The page publishes its hero params here; the ONE persistent shader in
@@ -51,6 +52,7 @@ export function useSetHeroParams(params: HeroParams) {
     params.inflate,
     params.bleedBelow,
     params.frame,
+    params.fallbackKey,
   ]);
 }
 
@@ -215,6 +217,21 @@ function PersistentHeroCanvas({ params }: { params: HeroParams | null }) {
         WebkitMaskImage: mask,
       }}
     >
+      {/* Static screenshot of the shader, BEHIND the canvas. Safety net:
+          if WebGL is slow or fails to init (common on first load,
+          esp. Safari/Private — works on refresh), the hero shows this
+          instead of going blank. The shader paints over it once ready
+          (it's a pixel-exact screenshot, so no visible swap). */}
+      <div
+        className="hero-fallback absolute inset-0 h-full w-full"
+        style={
+          {
+            backgroundColor: base.colorBack,
+            "--fb-light": `url(/${params.fallbackKey}-light.webp)`,
+            "--fb-dark": `url(/${params.fallbackKey}-dark.webp)`,
+          } as React.CSSProperties
+        }
+      />
       <ShaderBoundary>
         <GrainGradient
           colors={colors}

@@ -81,6 +81,7 @@ export function HeroBackground({
     inflate,
     bleedBelow,
     frame,
+    fallbackKey,
   });
 
   // Bleed only on high-perf (glass atmosphere by design). Low-perf: no
