@@ -195,6 +195,15 @@ body {
 ::view-transition-new(root) {
   mix-blend-mode: normal;
 }
+/* The live <canvas> (WebGL shader) snapshots as TRANSPARENT in the root
+   capture. Without this, those regions reveal the browser's default
+   color-scheme canvas (a ~#121212 gray) — "the background disappears to
+   a darker gray that isn't ours." Painting the group with our theme
+   background makes any transparent region OUR color, so the transition
+   reads as a clean fade-through-background instead of a gray flash. */
+::view-transition-group(root) {
+  background-color: var(--background);
+}
 
 /* Branded route loader — a thin rotating arc in the accent color. */
 @keyframes loaderSpin {
