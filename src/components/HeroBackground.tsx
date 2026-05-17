@@ -206,36 +206,46 @@ export function HeroBackground({
       }
       style={wrapperStyle}
     >
-      {/* Static fallback — a real screenshot of the shader, per theme. Always
-          present underneath so there is never a blank hero, even mid-frame
-          or if the shader throws. */}
-      <img
-        src={`/${fallbackKey}-${theme}.webp`}
-        alt=""
+      {/* Static fallback — a real screenshot of the shader, per theme.
+          Driven by CSS keyed on [data-theme] (set pre-paint by the inline
+          script), NOT React state — so the correct-theme image is fetched
+          on the very first paint and there is no light→dark swap. Only the
+          active theme's image is ever requested. Always present underneath
+          so the hero is never blank, even mid-frame or if the shader
+          throws. */}
+      <div
         aria-hidden
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ background: base.colorBack }}
+        className="hero-fallback absolute inset-0 h-full w-full"
+        style={
+          {
+            backgroundColor: base.colorBack,
+            "--fb-light": `url(/${fallbackKey}-light.webp)`,
+            "--fb-dark": `url(/${fallbackKey}-dark.webp)`,
+          } as React.CSSProperties
+        }
       />
 
       {capable && (
         <ShaderBoundary>
-          <GrainGradient
-            colors={colors}
-            colorBack={base.colorBack}
-            softness={softness ?? base.softness}
-            intensity={intensity ?? base.intensity}
-            noise={noise ?? base.noise}
-            shape={shape}
-            speed={onScreen ? 0.15 : 0}
-            frame={frame}
-            style={{
-              position: "absolute",
-              top: insetPct,
-              left: insetPct,
-              right: insetPct,
-              bottom: insetPct,
-            }}
-          />
+          <div className="shader-fade absolute inset-0">
+            <GrainGradient
+              colors={colors}
+              colorBack={base.colorBack}
+              softness={softness ?? base.softness}
+              intensity={intensity ?? base.intensity}
+              noise={noise ?? base.noise}
+              shape={shape}
+              speed={onScreen ? 0.15 : 0}
+              frame={frame}
+              style={{
+                position: "absolute",
+                top: insetPct,
+                left: insetPct,
+                right: insetPct,
+                bottom: insetPct,
+              }}
+            />
+          </div>
         </ShaderBoundary>
       )}
 

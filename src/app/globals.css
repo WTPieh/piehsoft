@@ -189,3 +189,33 @@ body {
     animation-duration: 1.6s;
   }
 }
+
+/* Hero static fallback: theme chosen by CSS (the [data-theme] attribute
+   is set by the inline script before first paint), so the correct image
+   is requested immediately — no light→dark swap, only one image loads. */
+.hero-fallback {
+  background-image: var(--fb-light);
+  background-size: cover;
+  background-position: center;
+}
+[data-theme="dark"] .hero-fallback {
+  background-image: var(--fb-dark);
+}
+
+/* Shader crossfades up over the static fallback instead of popping in. */
+@keyframes shaderFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.shader-fade {
+  animation: shaderFade 0.9s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shader-fade {
+    animation: none;
+  }
+}
