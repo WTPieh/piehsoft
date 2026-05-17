@@ -205,17 +205,15 @@ body {
   background-color: var(--background);
 }
 
-/* Apple-style freeze, done WITHOUT lifting any element out of layout.
-   While a route view-transition is running, hide the live WebGL shader
-   <canvas>. Its pixel-exact static screenshot (.hero-fallback) sits
-   directly behind it, correctly positioned and clipped in normal flow,
-   so the hero shows that frozen image for the whole transition — no
-   transparent canvas, no teardown/rebuild visible. The shader (which is
-   identical to the screenshot) simply reappears when the transition
-   ends, so there is no pop. */
-:root:active-view-transition [data-hero-bg] canvas {
-  visibility: hidden;
-}
+/* No canvas hiding needed here. The shader is now ONE persistent
+   fixed canvas ([data-hero-canvas]) that never unmounts — so it draws
+   continuously through the whole navigation (the new root is live).
+   In the OLD root snapshot the transparent canvas sits ON TOP of the
+   per-page opaque static screenshot (.hero-fallback, z-0, inside
+   [data-hero-bg]) → the snapshot shows that correct frozen image. So
+   the transition reads: correct static hero fades out → live
+   continuous shader fades in. group(root) bg above is just a safety
+   net for any remaining transparent edge. No teardown, no gray. */
 
 /* Branded route loader — a thin rotating arc in the accent color. */
 @keyframes loaderSpin {

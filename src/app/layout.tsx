@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { HeroPrefetch } from "@/components/HeroPrefetch";
+import { HeroShaderProvider } from "@/components/HeroShader";
 
 const instrumentSerif = Instrument_Serif({
   variable: "--font-instrument-serif",
@@ -96,9 +97,17 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SmoothScroll />
         <HeroPrefetch />
-        <Header />
-        <main className="flex-1 pt-16">{children}</main>
-        <Footer />
+        {/* One persistent WebGL shader, mounted here and NEVER unmounted
+            on navigation. It position:fixed-tracks each page's
+            [data-hero-anchor] so it scrolls with the hero exactly like
+            before — but the WebGL context is never destroyed/rebuilt,
+            which was the route-transition flash. Pages publish params
+            via this provider's context; the shader morphs. */}
+        <HeroShaderProvider>
+          <Header />
+          <main className="flex-1 pt-16">{children}</main>
+          <Footer />
+        </HeroShaderProvider>
       </body>
     </html>
     </ViewTransitions>
