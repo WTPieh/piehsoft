@@ -174,7 +174,13 @@ body {
    canvas is painted BEFORE this in the provider, so the stacking
    context this forms doesn't put it on top. */
 .page-enter {
-  animation: pageEnter 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+  /* `backwards`, NOT `both`: with `both` the final keyframe's
+     `transform: translate3d(0,0,0)` stays applied forever. A non-none
+     transform makes this a "backdrop root" in Chrome, so the bleed
+     strip's backdrop-filter can't reach the fixed shader behind it →
+     the strip renders blank in Chrome (Safari is lenient). `backwards`
+     plays the animation fully, then reverts to no transform. */
+  animation: pageEnter 0.7s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 @media (prefers-reduced-motion: reduce) {
   .page-enter {
