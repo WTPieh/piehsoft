@@ -205,28 +205,16 @@ body {
   background-color: var(--background);
 }
 
-/* Apple-style freeze for the hero. The static fallback (.hero-fallback,
-   a pixel-exact opaque WebP screenshot of the shader) gets its OWN
-   view-transition-name, so the API captures IT as an independent,
-   opaque snapshot — never the live <canvas>. The shader canvas stays
-   in `root` (covered by the bg above), so the hero shows the frozen
-   screenshot through the whole transition: no teardown, no transparent
-   gray, no rebuild visible. Group animation disabled so two heroes of
-   different height don't morph/stretch; old/new use the SAME sequential
-   fade-through as root so the whole screen moves as one. */
-::view-transition-group(hero) {
-  animation: none;
-}
-::view-transition-old(hero) {
-  animation: vtFadeOut 0.3s cubic-bezier(0.4, 0, 1, 1) both;
-}
-::view-transition-new(hero) {
-  animation: vtFadeIn 0.42s cubic-bezier(0, 0, 0.2, 1) both;
-  animation-delay: 0.32s;
-}
-::view-transition-old(hero),
-::view-transition-new(hero) {
-  mix-blend-mode: normal;
+/* Apple-style freeze, done WITHOUT lifting any element out of layout.
+   While a route view-transition is running, hide the live WebGL shader
+   <canvas>. Its pixel-exact static screenshot (.hero-fallback) sits
+   directly behind it, correctly positioned and clipped in normal flow,
+   so the hero shows that frozen image for the whole transition — no
+   transparent canvas, no teardown/rebuild visible. The shader (which is
+   identical to the screenshot) simply reappears when the transition
+   ends, so there is no pop. */
+:root:active-view-transition [data-hero-bg] canvas {
+  visibility: hidden;
 }
 
 /* Branded route loader — a thin rotating arc in the accent color. */
@@ -246,9 +234,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root),
-  ::view-transition-new(root),
-  ::view-transition-old(hero),
-  ::view-transition-new(hero) {
+  ::view-transition-new(root) {
     animation: none;
   }
   .route-loader {
@@ -263,10 +249,6 @@ body {
   background-image: var(--fb-light);
   background-size: cover;
   background-position: center;
-  /* Captured as its own opaque snapshot during route transitions (see
-     the ::view-transition(hero) rules) — this is the Apple-style freeze
-     frame, so the live shader canvas is never what animates. */
-  view-transition-name: hero;
 }
 [data-theme="dark"] .hero-fallback {
   background-image: var(--fb-dark);
