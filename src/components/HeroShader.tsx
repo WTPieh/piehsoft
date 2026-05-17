@@ -104,6 +104,7 @@ function PersistentHeroCanvas({ params }: { params: HeroParams | null }) {
   const theme = useTheme();
   const capable = useShaderCapable();
   const containerRef = useRef<HTMLDivElement>(null);
+  const metricsRef = useRef({ docTop: 0, height: 0, found: false });
   const [onScreen, setOnScreen] = useState(true);
   const base = PALETTE[theme];
 
@@ -115,28 +116,65 @@ function PersistentHeroCanvas({ params }: { params: HeroParams | null }) {
     [params?.brandColor, base.colors, base.colorBack],
   );
 
-  // Track the active hero anchor every frame: position the fixed
-  // container over it and pause the shader when it scrolls off-screen.
+  // MEASURE the hero anchor (the only getBoundingClientRect — a forced
+  // reflow) ONLY on route change / resize / layout settle, never per
+  // frame. Per-frame reflow was the scroll lag. docTop = the anchor's
+  // position in the document (scroll-independent); height/opacity are
+  // written here, not in the loop.
+  useEffect(() => {
+    if (!capable) return;
+    const measure = () => {
+      const el = containerRef.current;
+      const anchor = document.querySelector<HTMLElement>("[data-hero-anchor]");
+      if (!el) return;
+      if (!anchor) {
+        metricsRef.current.found = false;
+        el.style.opacity = "0";
+        return;
+      }
+      const r = anchor.getBoundingClientRect();
+      metricsRef.current = {
+        docTop: r.top + window.scrollY,
+        height: r.height,
+        found: true,
+      };
+      el.style.height = `${r.height}px`;
+      el.style.opacity = "1";
+    };
+    measure();
+    // Re-measure after fonts/images/layout settle.
+    const t1 = setTimeout(measure, 60);
+    const t2 = setTimeout(measure, 300);
+    const anchor = document.querySelector<HTMLElement>("[data-hero-anchor]");
+    const ro = new ResizeObserver(measure);
+    if (anchor) ro.observe(anchor);
+    window.addEventListener("resize", measure);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [capable, params]);
+
+  // Per-frame: REFLOW-FREE. Only reads window.scrollY (cached, no
+  // layout) and writes transform (composited, no layout). This is what
+  // makes the persistent canvas scroll with the hero without the jank.
   useEffect(() => {
     if (!capable) return;
     let raf = 0;
     let lastVisible = true;
     const tick = () => {
       const el = containerRef.current;
-      const anchor = document.querySelector<HTMLElement>("[data-hero-anchor]");
-      if (el) {
-        if (anchor) {
-          const r = anchor.getBoundingClientRect();
-          el.style.transform = `translate3d(0, ${r.top}px, 0)`;
-          el.style.height = `${r.height}px`;
-          el.style.opacity = "1";
-          const visible = r.bottom > -200 && r.top < window.innerHeight + 200;
-          if (visible !== lastVisible) {
-            lastVisible = visible;
-            setOnScreen(visible);
-          }
-        } else {
-          el.style.opacity = "0";
+      const m = metricsRef.current;
+      if (el && m.found) {
+        const top = m.docTop - window.scrollY;
+        el.style.transform = `translate3d(0, ${top}px, 0)`;
+        const visible =
+          top + m.height > -200 && top < window.innerHeight + 200;
+        if (visible !== lastVisible) {
+          lastVisible = visible;
+          setOnScreen(visible);
         }
       }
       raf = requestAnimationFrame(tick);
