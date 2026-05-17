@@ -154,16 +154,37 @@ body {
    correct-theme static hero is instant via CSS). Clean single dissolve,
    no double fade, premium. */
 @keyframes vtFadeOut {
+  from {
+    opacity: 1;
+  }
   to {
     opacity: 0;
   }
 }
+@keyframes vtFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Fade-THROUGH-background, not a cross-dissolve. A root cross-dissolve
+   overlaps two different pages (different content + scroll position) →
+   you see the old page's text ghost through ("a different path name")
+   and it reads harsh. Instead the old page fades out, the solid theme
+   background shows for a beat, then the new page fades in. The two
+   pages are never visible at once: no ghosting, no stale path, no
+   scroll mismatch. Opacity only (transforms cause VT jank). */
 ::view-transition-old(root) {
-  animation: vtFadeOut 0.34s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: vtFadeOut 0.26s cubic-bezier(0.4, 0, 1, 1) both;
 }
 ::view-transition-new(root) {
-  /* Already fully rendered underneath — just be present, don't animate. */
-  animation: none;
+  animation: vtFadeIn 0.34s cubic-bezier(0, 0, 0.2, 1) both;
+  animation-delay: 0.22s;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
   mix-blend-mode: normal;
 }
 
@@ -214,7 +235,7 @@ body {
   }
 }
 .shader-fade {
-  animation: shaderFade 0.9s ease-out both;
+  animation: shaderFade 0.5s ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
   .shader-fade {
