@@ -154,16 +154,27 @@ body {
    the PAGE CONTENT does a soft opacity fade-in. template.tsx remounts
    per route so this runs each navigation. Opacity only — no transform
    (a transform would create a containing block / jank) and no filter. */
-@keyframes pageFade {
-  from {
+@keyframes pageEnter {
+  0% {
     opacity: 0;
+    transform: translate3d(0, 28px, 0);
   }
-  to {
+  60% {
     opacity: 1;
   }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
+/* Content rises + fades in on each navigation. Evenly-paced easing
+   (cubic-bezier 0.4,0,0.2,1) so the motion is actually perceptible
+   across the full ~0.7s — a front-loaded ease finished in ~150ms and
+   read as "no animation". Opacity + transform only (GPU, no jank). The
+   canvas is painted BEFORE this in the provider, so the stacking
+   context this forms doesn't put it on top. */
 .page-enter {
-  animation: pageFade 0.34s ease-out both;
+  animation: pageEnter 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .page-enter {
