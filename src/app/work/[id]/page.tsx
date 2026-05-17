@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Link } from "next-view-transitions";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HeroBackground } from "@/components/HeroBackground";
 import { CaseStudySection } from "@/components/CaseStudySection";

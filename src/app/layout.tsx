@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { ViewTransitions } from "next-view-transitions";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { SmoothScroll } from "@/components/SmoothScroll";
@@ -82,7 +81,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ViewTransitions>
     <html
       lang="en"
       data-theme="light"
@@ -110,6 +108,5 @@ export default function RootLayout({
         </HeroShaderProvider>
       </body>
     </html>
-    </ViewTransitions>
   );
 }

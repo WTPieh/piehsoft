@@ -145,75 +145,31 @@ body {
 
 /* ---- Route transition + loading ---------------------------------- */
 
-/* Native View Transitions (via next-view-transitions).
-
-   The new page is NOT animated: animating it crossfades a snapshot that
-   was captured before the hero finished painting → the stutter/flicker
-   ("old frame, then new fades in"). Instead we ONLY dissolve the OLD
-   page out, revealing the already-rendered new page beneath it (its
-   correct-theme static hero is instant via CSS). Clean single dissolve,
-   no double fade, premium. */
-@keyframes vtFadeOut {
-  from {
-    opacity: 1;
-    filter: blur(0);
-  }
-  to {
-    opacity: 0;
-    filter: blur(7px);
-  }
-}
-@keyframes vtFadeIn {
+/* No View Transitions API. It overlays the live page with snapshots for
+   the whole navigation, and a <canvas> always snapshots TRANSPARENT —
+   so the hero "disappeared and reappeared" on every route change even
+   though the WebGL context is now persistent. Instead: the shader is
+   ONE continuous canvas in the layout that is never snapshotted or
+   unmounted (it just keeps rendering through the navigation), and only
+   the PAGE CONTENT does a soft opacity fade-in. template.tsx remounts
+   per route so this runs each navigation. Opacity only — no transform
+   (a transform would create a containing block / jank) and no filter. */
+@keyframes pageFade {
   from {
     opacity: 0;
-    filter: blur(7px);
   }
   to {
     opacity: 1;
-    filter: blur(0);
   }
 }
-/* Fade-THROUGH-background, not a cross-dissolve. A root cross-dissolve
-   overlaps two different pages (different content + scroll position) →
-   you see the old page's text ghost through ("a different path name")
-   and it reads harsh. Instead the old page fades out, the solid theme
-   background shows for a beat, then the new page fades in. The two
-   pages are never visible at once: no ghosting, no stale path, no
-   scroll mismatch. Opacity only (transforms cause VT jank). */
-/* Strictly sequential: old fully fades (+ blurs) out to the solid theme
-   background, THEN the new page fades (+ unblurs) in. new's delay >=
-   old's duration so the two are NEVER co-visible — no ghosting, and the
-   hero's WebGL teardown/rebuild happens hidden behind the solid bg. */
-::view-transition-old(root) {
-  animation: vtFadeOut 0.3s cubic-bezier(0.4, 0, 1, 1) both;
+.page-enter {
+  animation: pageFade 0.34s ease-out both;
 }
-::view-transition-new(root) {
-  animation: vtFadeIn 0.42s cubic-bezier(0, 0, 0.2, 1) both;
-  animation-delay: 0.32s;
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
 }
-::view-transition-old(root),
-::view-transition-new(root) {
-  mix-blend-mode: normal;
-}
-/* The live <canvas> (WebGL shader) snapshots as TRANSPARENT in the root
-   capture. Without this, those regions reveal the browser's default
-   color-scheme canvas (a ~#121212 gray) — "the background disappears to
-   a darker gray that isn't ours." Painting the group with our theme
-   background makes any transparent region OUR color, so the transition
-   reads as a clean fade-through-background instead of a gray flash. */
-::view-transition-group(root) {
-  background-color: var(--background);
-}
-
-/* No canvas hiding needed here. The shader is now ONE persistent
-   fixed canvas ([data-hero-canvas]) that never unmounts — so it draws
-   continuously through the whole navigation (the new root is live).
-   In the OLD root snapshot the transparent canvas sits ON TOP of the
-   per-page opaque static screenshot (.hero-fallback, z-0, inside
-   [data-hero-bg]) → the snapshot shows that correct frozen image. So
-   the transition reads: correct static hero fades out → live
-   continuous shader fades in. group(root) bg above is just a safety
-   net for any remaining transparent edge. No teardown, no gray. */
 
 /* Branded route loader — a thin rotating arc in the accent color. */
 @keyframes loaderSpin {
