@@ -156,17 +156,21 @@ body {
 @keyframes vtFadeOut {
   from {
     opacity: 1;
+    filter: blur(0);
   }
   to {
     opacity: 0;
+    filter: blur(7px);
   }
 }
 @keyframes vtFadeIn {
   from {
     opacity: 0;
+    filter: blur(7px);
   }
   to {
     opacity: 1;
+    filter: blur(0);
   }
 }
 /* Fade-THROUGH-background, not a cross-dissolve. A root cross-dissolve
@@ -176,12 +180,16 @@ body {
    background shows for a beat, then the new page fades in. The two
    pages are never visible at once: no ghosting, no stale path, no
    scroll mismatch. Opacity only (transforms cause VT jank). */
+/* Strictly sequential: old fully fades (+ blurs) out to the solid theme
+   background, THEN the new page fades (+ unblurs) in. new's delay >=
+   old's duration so the two are NEVER co-visible — no ghosting, and the
+   hero's WebGL teardown/rebuild happens hidden behind the solid bg. */
 ::view-transition-old(root) {
-  animation: vtFadeOut 0.26s cubic-bezier(0.4, 0, 1, 1) both;
+  animation: vtFadeOut 0.3s cubic-bezier(0.4, 0, 1, 1) both;
 }
 ::view-transition-new(root) {
-  animation: vtFadeIn 0.34s cubic-bezier(0, 0, 0.2, 1) both;
-  animation-delay: 0.22s;
+  animation: vtFadeIn 0.42s cubic-bezier(0, 0, 0.2, 1) both;
+  animation-delay: 0.32s;
 }
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -225,23 +233,6 @@ body {
   background-image: var(--fb-dark);
 }
 
-/* Shader crossfades up over the static fallback instead of popping in. */
-@keyframes shaderFade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-.shader-fade {
-  animation: shaderFade 0.5s ease-out both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .shader-fade {
-    animation: none;
-  }
-}
 
 /* Lenis smooth scroll (premium / high-perf only; see SmoothScroll.tsx).
    Required so the page scrolls naturally while Lenis eases the wheel. */

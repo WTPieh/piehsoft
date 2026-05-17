@@ -5,10 +5,17 @@ import {
   Component,
   type ReactNode,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+
+// Runs before the browser paints (client) — so on a client-side route
+// navigation the new hero decides shader-vs-static BEFORE the user sees
+// a frame, instead of painting the static-only state then swapping.
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 type Theme = "light" | "dark";
 
@@ -37,7 +44,7 @@ function useTheme(): Theme {
  */
 function useShaderCapable(): boolean {
   const [capable, setCapable] = useState(false);
-  useEffect(() => {
+  useIsoLayoutEffect(() => {
     setCapable(document.documentElement.dataset.perf === "high");
   }, []);
   return capable;
@@ -227,25 +234,27 @@ export function HeroBackground({
 
       {capable && (
         <ShaderBoundary>
-          <div className="shader-fade absolute inset-0">
-            <GrainGradient
-              colors={colors}
-              colorBack={base.colorBack}
-              softness={softness ?? base.softness}
-              intensity={intensity ?? base.intensity}
-              noise={noise ?? base.noise}
-              shape={shape}
-              speed={onScreen ? 0.15 : 0}
-              frame={frame}
-              style={{
-                position: "absolute",
-                top: insetPct,
-                left: insetPct,
-                right: insetPct,
-                bottom: insetPct,
-              }}
-            />
-          </div>
+          {/* No fade-in: the static fallback below is a pixel-accurate
+              screenshot of this shader, so the shader simply takes over
+              with no visible transition (a fade would read as a
+              transparent→opaque flash on every mount). */}
+          <GrainGradient
+            colors={colors}
+            colorBack={base.colorBack}
+            softness={softness ?? base.softness}
+            intensity={intensity ?? base.intensity}
+            noise={noise ?? base.noise}
+            shape={shape}
+            speed={onScreen ? 0.15 : 0}
+            frame={frame}
+            style={{
+              position: "absolute",
+              top: insetPct,
+              left: insetPct,
+              right: insetPct,
+              bottom: insetPct,
+            }}
+          />
         </ShaderBoundary>
       )}
 
