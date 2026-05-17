@@ -39,6 +39,15 @@ export function SmoothScroll() {
 
     const tick = (time: number) => {
       lenis.raf(time);
+      // End the release glide a little faster: once you've essentially
+      // stopped (low velocity) but Lenis is still slowly crawling the
+      // last few px toward target, snap to rest instead of the long
+      // asymptotic tail. Doesn't touch active scrolling (velocity is
+      // high there), so the tracking feel is unchanged.
+      const gap = Math.abs(lenis.targetScroll - lenis.animatedScroll);
+      if (Math.abs(lenis.velocity) < 0.6 && gap > 0.5 && gap < 6) {
+        lenis.scrollTo(lenis.targetScroll, { immediate: true });
+      }
       if (idle()) {
         running = false; // stop — nothing is moving, don't burn frames
         return;
