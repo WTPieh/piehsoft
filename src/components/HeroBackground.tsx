@@ -106,29 +106,29 @@ export function HeroBackground({
       style={wrapperStyle}
     >
       {/* Static fallback — pixel-exact screenshot of the shader, per
-          theme. Chosen by CSS keyed on [data-theme] (set pre-paint) so
-          the right image is fetched on first paint. The whole hero on
-          low-perf; the instant base under the persistent shader on
-          high-perf. */}
-      <div
-        aria-hidden
-        className="hero-fallback absolute inset-0 h-full w-full"
-        style={
-          {
-            backgroundColor: base.colorBack,
-            "--fb-light": `url(/${fallbackKey}-light.webp)`,
-            "--fb-dark": `url(/${fallbackKey}-dark.webp)`,
-          } as React.CSSProperties
-        }
-      />
+          theme. ONLY on low-perf: it IS the hero there. On high-perf the
+          persistent shader (fixed, z-index:-1) is the hero; rendering
+          this image would sit at z-0 in the section and occlude it. */}
+      {!capable && (
+        <div
+          aria-hidden
+          className="hero-fallback absolute inset-0 h-full w-full"
+          style={
+            {
+              backgroundColor: base.colorBack,
+              "--fb-light": `url(/${fallbackKey}-light.webp)`,
+              "--fb-dark": `url(/${fallbackKey}-dark.webp)`,
+            } as React.CSSProperties
+          }
+        />
+      )}
 
       {vignette > 0 && (
-        // z-6: above the persistent shader canvas (fixed, z-5), below
-        // hero text (z-10) — so it darkens the shader exactly as before.
+        // Sits above the persistent shader (z-index:-1) and the low-perf
+        // static image, below the hero text — darkens the hero as before.
         <div
           className="absolute inset-0"
           style={{
-            zIndex: 6,
             background: `radial-gradient(ellipse 130% 110% at center, transparent 55%, rgba(0,0,0,${vignette}) 100%)`,
           }}
         />

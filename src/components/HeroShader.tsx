@@ -164,7 +164,12 @@ function PersistentHeroCanvas({ params }: { params: HeroParams | null }) {
         right: 0,
         top: 0,
         height: 0,
-        zIndex: 5, // above the per-page static image (z-0), below hero text (z-10)
+        // Behind ALL page content (like the original in-section shader,
+        // which sat behind the z-10/auto hero text). It's clipped to the
+        // hero box (height/translateY track the anchor), so it never
+        // shows behind other sections. On high-perf the per-page static
+        // image is NOT rendered, so nothing occludes this.
+        zIndex: -1,
         overflow: "hidden",
         pointerEvents: "none",
         willChange: "transform",
