@@ -43,8 +43,9 @@ export default async function ProjectPage({
   return (
     <>
       {/* Hero */}
-      <section className="relative border-b border-border -mt-16">
+      <section className="relative -mt-16">
         <HeroBackground
+          fallbackKey={`hero-${project.id}`}
           brandColor={project.hero.glow}
           shape="wave"
           intensity={0.05}
@@ -90,8 +91,12 @@ export default async function ProjectPage({
             Height must cover the hero's bleedBelow distance + buffer. */}
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 h-[400px] pointer-events-none backdrop-blur-md backdrop-saturate-150 z-0"
+          className="absolute inset-x-0 top-0 h-[400px] pointer-events-none z-0"
           style={{
+            // Muted blur (desaturated/darkened) on high-perf; `none` on
+            // low-perf (shared flag) — solid comes from --bleed-fade below.
+            backdropFilter: "var(--glass-filter-cs)",
+            WebkitBackdropFilter: "var(--glass-filter-cs)",
             maskImage:
               "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
             WebkitMaskImage:
@@ -102,8 +107,11 @@ export default async function ProjectPage({
           aria-hidden
           className="absolute inset-x-0 top-0 h-[400px] pointer-events-none z-0"
           style={{
-            background:
-              "linear-gradient(to bottom, transparent 0%, transparent 30%, var(--background) 100%)",
+            // High-perf: long transparent ramp so the (muted) blur reads.
+            // Low-perf: --bleed-fade goes solid fast so content sits on
+            // opaque bg. Color muting is handled by --glass-filter-cs, not
+            // a heavy veil (which previously flattened the blur to solid).
+            background: "var(--bleed-fade)",
           }}
         />
         {/* Refraction rim — theme-aware specular hairline at the glass edge */}

@@ -46,7 +46,7 @@ export function ProjectCard({
         </div>
 
         <div className="col-span-12 sm:col-span-6">
-          <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
+          <div className="relative aspect-[4/3]">
             <BrandGlow color={project.hero.glow} intensity={0.7} />
             <div className="relative h-full w-full flex items-center justify-center p-6">
               <div className="relative h-full w-full">

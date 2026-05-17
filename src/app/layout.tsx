@@ -42,6 +42,36 @@ const themeScript = `
 })();
 `;
 
+// Single source of truth for "can this device do the heavy stuff": the
+// animated WebGL shader AND the glass backdrop-blur. Runs before first
+// paint so there is no flash. Defaults to "low" (solid, no blur) on any
+// failure — weak/blocklisted GPUs (which refuse a no-caveat WebGL context)
+// and reduced-motion users land here. HeroBackground reads this same flag.
+const perfScript = `
+(function () {
+  try {
+    // Manual override for testing/screenshots: localStorage 'pf' = 'high'|'low'.
+    var forced = null;
+    try { forced = localStorage.getItem('pf'); } catch (e) {}
+    if (forced === 'high' || forced === 'low') {
+      document.documentElement.setAttribute('data-perf', forced);
+      return;
+    }
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var ok = false;
+    if (!reduced) {
+      var c = document.createElement('canvas');
+      var a = { failIfMajorPerformanceCaveat: true };
+      var gl = c.getContext('webgl2', a) || c.getContext('webgl', a) || c.getContext('experimental-webgl', a);
+      ok = !!gl;
+    }
+    document.documentElement.setAttribute('data-perf', ok ? 'high' : 'low');
+  } catch (e) {
+    document.documentElement.setAttribute('data-perf', 'low');
+  }
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -51,11 +81,13 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme="light"
+      data-perf="low"
       className={`${instrumentSerif.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: perfScript }} />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Header />

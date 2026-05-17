@@ -4,9 +4,15 @@ import { ThemeToggle } from "./ThemeToggle";
 export function Header() {
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm backdrop-saturate-150"
+      className="fixed top-0 left-0 right-0 z-50"
       style={{
-        background: "color-mix(in oklab, var(--background) 40%, transparent)",
+        // High-perf: translucent glass + blur (original design, meshes with
+        // the shader). Low-perf: solid full background, no backdrop-filter
+        // (a fixed blur re-snapshots the page every scroll frame on weak
+        // GPUs). Driven by the shared data-perf flag.
+        background: "var(--header-bg)",
+        backdropFilter: "var(--glass-filter)",
+        WebkitBackdropFilter: "var(--glass-filter)",
       }}
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-10 h-16 flex items-center justify-between gap-4">

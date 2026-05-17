@@ -55,9 +55,14 @@ export function SectionPillNav({ items }: { items: Item[] }) {
     >
       <nav
         ref={scrollerRef}
-        className="flex items-center gap-1 rounded-full backdrop-blur-sm backdrop-saturate-150 px-2 py-1.5 overflow-x-auto max-w-[calc(100vw-2rem)] no-scrollbar"
+        className="flex items-center gap-1 rounded-full px-2 py-1.5 overflow-x-auto max-w-[calc(100vw-2rem)] no-scrollbar"
         style={{
-          background: "var(--glass-pill-bg)",
+          // High-perf: translucent glass + blur. Low-perf: solid pill, no
+          // backdrop-filter (a sticky blur repaints every scroll frame).
+          // Driven by the shared data-perf flag.
+          background: "var(--pill-bg)",
+          backdropFilter: "var(--glass-filter)",
+          WebkitBackdropFilter: "var(--glass-filter)",
           /* Refraction rim — top specular highlight following the curve,
              matching the header's glass-rim treatment. */
           boxShadow:

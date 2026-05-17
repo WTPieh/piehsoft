@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative border-b border-border -mt-16">
+      <section className="relative -mt-16">
         <HeroBackground inflate={0.25} bleedBelow={240} />
         <div className="relative z-10 mx-auto max-w-6xl px-6 sm:px-10 pt-36 pb-24 sm:pt-48 sm:pb-32">
           <p className="font-mono-tag text-muted mb-8">
@@ -36,10 +36,11 @@ export default function HomePage() {
             </a>
             <a
               href="#contact"
-              className="inline-flex items-center gap-3 px-5 py-3 rounded-sm font-mono-tag border border-border hover:border-foreground transition-colors backdrop-blur-sm backdrop-saturate-150"
+              className="inline-flex items-center gap-3 px-5 py-3 rounded-sm font-mono-tag border border-border hover:border-foreground transition-colors"
               style={{
-                background:
-                  "color-mix(in oklab, var(--background) 40%, transparent)",
+                background: "var(--header-bg)",
+                backdropFilter: "var(--glass-filter)",
+                WebkitBackdropFilter: "var(--glass-filter)",
               }}
             >
               Bring us a brief →
@@ -67,11 +68,16 @@ export default function HomePage() {
       {/* Featured work */}
       <section id="work" className="relative border-b border-border">
 
-        {/* Glass strip blurring the hero's bleed, fading to solid bg */}
+        {/* Glass strip blurring the hero's bleed. High-perf only: the
+            backdrop-filter resolves to `none` on low-perf devices (shared
+            data-perf flag), where a blur this large was a major scroll-jank
+            source — the solid gradient fade below carries the transition. */}
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 h-60 pointer-events-none backdrop-blur-md backdrop-saturate-150 z-0"
+          className="absolute inset-x-0 top-0 h-60 pointer-events-none z-0"
           style={{
+            backdropFilter: "var(--glass-filter-strong)",
+            WebkitBackdropFilter: "var(--glass-filter-strong)",
             maskImage:
               "linear-gradient(to bottom, black 0%, black 30%, transparent 100%)",
             WebkitMaskImage:
@@ -81,10 +87,7 @@ export default function HomePage() {
         <div
           aria-hidden
           className="absolute inset-x-0 top-0 h-60 pointer-events-none z-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, transparent 0%, var(--background) 100%)",
-          }}
+          style={{ background: "var(--bleed-fade)" }}
         />
         {/* Refraction rim — theme-aware specular hairline at the glass edge */}
         <div

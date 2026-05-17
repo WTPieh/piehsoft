@@ -1,7 +1,14 @@
 "use client";
 
 import { GrainGradient } from "@paper-design/shaders-react";
-import { useEffect, useMemo, useState } from "react";
+import {
+  Component,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 type Theme = "light" | "dark";
 
@@ -21,16 +28,58 @@ function useTheme(): Theme {
   return theme;
 }
 
-function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
+/**
+ * Whether this device should run the live WebGL shader. Reads the shared
+ * `data-perf` flag set pre-paint in layout.tsx (same probe that gates the
+ * glass backdrop-blur), so the shader and the glass always flip together.
+ * Starts `false` so SSR / static export and the first client paint render
+ * the safe image; upgrades to the shader after mount if perf is "high".
+ */
+function useShaderCapable(): boolean {
+  const [capable, setCapable] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = () => setReduced(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
+    setCapable(document.documentElement.dataset.perf === "high");
   }, []);
-  return reduced;
+  return capable;
+}
+
+/**
+ * True while the element is on (or near) screen. Used to *pause* the shader
+ * (speed 0) when the hero scrolls away — NOT to unmount it. Unmounting
+ * destroys the WebGL context; scrolling back recreates it, recompiling
+ * shaders and churning ~33MB contexts that aren't GC'd promptly (and
+ * eventually hits the browser's context limit). One persistent context,
+ * animation paused off-screen, is the correct trade.
+ */
+function useOnScreen(ref: React.RefObject<HTMLElement | null>): boolean {
+  const [onScreen, setOnScreen] = useState(true);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => setOnScreen(entry.isIntersecting),
+      { rootMargin: "200px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref]);
+  return onScreen;
+}
+
+/** If the shader library throws (context creation, lost context, unsupported
+ *  extension), swallow it so the static image underneath stays visible
+ *  instead of the whole page going blank. */
+class ShaderBoundary extends Component<
+  { children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
 }
 
 const PALETTE = {
@@ -94,6 +143,10 @@ type Props = {
   /** Initial frame (ms) to seed the shader's time uniform. Skips the
    *  "frame 0" composition. Try 8000–30000 for organic-looking starts. */
   frame?: number;
+  /** Basename of the static fallback screenshot (per-theme `.jpg` in
+   *  /public). The homepage corners hero uses the default; each case
+   *  study passes its own so low-perf devices get the matching wave. */
+  fallbackKey?: string;
   /** Extend the shader past the section's bottom by N pixels and
    *  fade it out over that distance. Lets the atmosphere bleed into
    *  the next section. Requires the section to use `overflow-x-clip`
@@ -111,9 +164,12 @@ export function HeroBackground({
   vignette = 0.35,
   frame = 12000,
   bleedBelow = 0,
+  fallbackKey = "hero",
 }: Props = {}) {
   const theme = useTheme();
-  const reduced = useReducedMotion();
+  const capable = useShaderCapable();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const onScreen = useOnScreen(wrapperRef);
   const base = PALETTE[theme];
 
   const colors = useMemo(
@@ -123,41 +179,66 @@ export function HeroBackground({
   );
 
   const insetPct = `-${inflate * 100}%`;
-  const wrapperStyle: React.CSSProperties =
-    bleedBelow > 0
-      ? {
-          bottom: `-${bleedBelow}px`,
-          maskImage: `linear-gradient(to bottom, black 0%, black calc(100% - ${bleedBelow}px), transparent 100%)`,
-          WebkitMaskImage: `linear-gradient(to bottom, black 0%, black calc(100% - ${bleedBelow}px), transparent 100%)`,
-        }
-      : {};
+  // Only bleed into the next section on high-perf (glass atmosphere by
+  // design). On low-perf: no mask at all — the image ends at the hero
+  // bounds, the section line handles the seam, solid bg immediately.
+  const bleeding = capable && bleedBelow > 0;
+  const wrapperStyle: React.CSSProperties = bleeding
+    ? {
+        bottom: `-${bleedBelow}px`,
+        maskImage: `linear-gradient(to bottom, black 0%, black calc(100% - ${bleedBelow}px), transparent 100%)`,
+        WebkitMaskImage: `linear-gradient(to bottom, black 0%, black calc(100% - ${bleedBelow}px), transparent 100%)`,
+      }
+    : {};
+
+  // Mount the shader once when the device can handle it, and keep it mounted
+  // for the whole session — toggling `speed` (below) pauses it off-screen
+  // without destroying/recreating the WebGL context.
 
   return (
     <div
+      ref={wrapperRef}
+      data-hero-bg
       className={
-        bleedBelow > 0
+        bleeding
           ? "absolute top-0 left-0 right-0 overflow-hidden z-0 pointer-events-none"
           : "absolute inset-0 overflow-hidden z-0 pointer-events-none"
       }
       style={wrapperStyle}
     >
-      <GrainGradient
-        colors={colors}
-        colorBack={base.colorBack}
-        softness={softness ?? base.softness}
-        intensity={intensity ?? base.intensity}
-        noise={noise ?? base.noise}
-        shape={shape}
-        speed={reduced ? 0 : 0.15}
-        frame={frame}
-        style={{
-          position: "absolute",
-          top: insetPct,
-          left: insetPct,
-          right: insetPct,
-          bottom: insetPct,
-        }}
+      {/* Static fallback — a real screenshot of the shader, per theme. Always
+          present underneath so there is never a blank hero, even mid-frame
+          or if the shader throws. */}
+      <img
+        src={`/${fallbackKey}-${theme}.jpg`}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ background: base.colorBack }}
       />
+
+      {capable && (
+        <ShaderBoundary>
+          <GrainGradient
+            colors={colors}
+            colorBack={base.colorBack}
+            softness={softness ?? base.softness}
+            intensity={intensity ?? base.intensity}
+            noise={noise ?? base.noise}
+            shape={shape}
+            speed={onScreen ? 0.15 : 0}
+            frame={frame}
+            style={{
+              position: "absolute",
+              top: insetPct,
+              left: insetPct,
+              right: insetPct,
+              bottom: insetPct,
+            }}
+          />
+        </ShaderBoundary>
+      )}
+
       {vignette > 0 && (
         <div
           className="absolute inset-0"
