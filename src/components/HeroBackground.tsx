@@ -124,11 +124,12 @@ export function HeroBackground({
       )}
 
       {vignette > 0 && (
-        // Sits above the persistent shader (z-index:-1) and the low-perf
-        // static image, below the hero text — darkens the hero as before.
+        // z-1: above the persistent shader (fixed, z-0) and the low-perf
+        // static image, below the hero text (z-10) — darkens as before.
         <div
           className="absolute inset-0"
           style={{
+            zIndex: 1,
             background: `radial-gradient(ellipse 130% 110% at center, transparent 55%, rgba(0,0,0,${vignette}) 100%)`,
           }}
         />

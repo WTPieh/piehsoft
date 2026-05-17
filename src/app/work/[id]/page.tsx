@@ -54,7 +54,7 @@ export default async function ProjectPage({
           bleedBelow={340}
           vignette={0.5}
         />
-        <div className="relative mx-auto max-w-6xl px-6 sm:px-10 pt-40 pb-24">
+        <div className="relative z-10 mx-auto max-w-6xl px-6 sm:px-10 pt-40 pb-24">
           <Link
             href="/#work"
             className="font-mono-tag text-muted hover:text-foreground transition-colors"
