@@ -145,29 +145,26 @@ body {
 
 /* ---- Route transition + loading ---------------------------------- */
 
-/* Native View Transitions (via next-view-transitions). Refine the
-   default root crossfade into a slower, eased dissolve with a subtle
-   settle — premium feel between routes. */
+/* Native View Transitions (via next-view-transitions).
+
+   The new page is NOT animated: animating it crossfades a snapshot that
+   was captured before the hero finished painting → the stutter/flicker
+   ("old frame, then new fades in"). Instead we ONLY dissolve the OLD
+   page out, revealing the already-rendered new page beneath it (its
+   correct-theme static hero is instant via CSS). Clean single dissolve,
+   no double fade, premium. */
 @keyframes vtFadeOut {
   to {
     opacity: 0;
   }
 }
-@keyframes vtFadeIn {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 10px, 0) scale(0.992);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
 ::view-transition-old(root) {
-  animation: vtFadeOut 0.32s cubic-bezier(0.4, 0, 1, 1) both;
+  animation: vtFadeOut 0.34s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 ::view-transition-new(root) {
-  animation: vtFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Already fully rendered underneath — just be present, don't animate. */
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 /* Branded route loader — a thin rotating arc in the accent color. */
@@ -223,4 +220,20 @@ body {
   .shader-fade {
     animation: none;
   }
+}
+
+/* Lenis smooth scroll (premium / high-perf only; see SmoothScroll.tsx).
+   Required so the page scrolls naturally while Lenis eases the wheel. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
 }
