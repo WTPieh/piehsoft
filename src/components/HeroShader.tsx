@@ -206,8 +206,12 @@ export function HeroShaderProvider({ children }: { children: ReactNode }) {
   const [params, setParams] = useState<HeroParams | null>(null);
   return (
     <HeroParamsContext.Provider value={setParams}>
-      {children}
+      {/* BEFORE children: template.tsx's .page-enter opacity animation
+          wraps the page in a stacking context (flattening the hero's
+          z-10). Painting the canvas first (earlier in DOM, same z-0
+          level) keeps it behind that whole content stacking context. */}
       <PersistentHeroCanvas params={params} />
+      {children}
     </HeroParamsContext.Provider>
   );
 }
