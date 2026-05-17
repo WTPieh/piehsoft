@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import type Lenis from "lenis";
 
 const easeInOutCubic = (t: number) =>
@@ -19,9 +18,6 @@ const easeInOutCubic = (t: number) =>
  * alone so Next navigates home normally.
  */
 export function AnchorScroll() {
-  const router = useRouter();
-  const navigatingRef = useRef(false);
-
   useEffect(() => {
     const reduce = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -81,36 +77,16 @@ export function AnchorScroll() {
         return;
       }
 
-      // CASE 2 — internal route nav with no hash (e.g. a project card):
-      // glide the current page smoothly to the top, THEN navigate, so
-      // it isn't an abrupt instant snap. Only when actually scrolled
-      // down; near the top there's nothing to smooth, just navigate.
-      if (
-        url.pathname !== location.pathname &&
-        !url.hash &&
-        lenis &&
-        !reduce &&
-        !navigatingRef.current &&
-        window.scrollY > 80
-      ) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        navigatingRef.current = true;
-        lenis.scrollTo(0, { duration: 0.8, easing: easeInOutCubic });
-        w.__lenisWake?.();
-        const dest = url.pathname + url.search;
-        window.setTimeout(() => router.push(dest), 760);
-        window.setTimeout(() => {
-          navigatingRef.current = false;
-        }, 1600);
-      }
-      // anything else → let Next/the browser handle it normally
+      // Route navigation (project cards, etc.) → let Next handle it
+      // normally. The new page mounts at its top and enters via
+      // template.tsx's .page-enter rise+fade — that IS the smooth
+      // transition; we deliberately do NOT scroll the page being left.
     };
 
     // Capture phase: run before Next/Lenis click handlers.
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [router]);
+  }, []);
 
   return null;
 }

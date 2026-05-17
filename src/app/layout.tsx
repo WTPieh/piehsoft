@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { AnchorScroll } from "@/components/AnchorScroll";
+import { ScrollTopOnRouteChange } from "@/components/ScrollTopOnRouteChange";
 import { HeroPrefetch } from "@/components/HeroPrefetch";
 import { HeroShaderProvider } from "@/components/HeroShader";
 
@@ -96,6 +97,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SmoothScroll />
         <AnchorScroll />
+        <ScrollTopOnRouteChange />
         <HeroPrefetch />
         {/* One persistent WebGL shader, mounted here and NEVER unmounted
             on navigation. It position:fixed-tracks each page's
