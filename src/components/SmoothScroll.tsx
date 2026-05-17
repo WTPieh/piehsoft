@@ -24,9 +24,12 @@ export function SmoothScroll() {
       wheelMultiplier: 1,
       smoothWheel: true,
       syncTouch: false, // native touch = thumb has full priority
-      anchors: { offset: -110 }, // smooth #link scroll, clears the header
       autoRaf: false, // we drive rAF so we can stop it on idle
     });
+    // Expose for AnchorScroll (which owns #link handling). Lenis's own
+    // `anchors` option is intentionally NOT used — it double-handled
+    // clicks with next/link and stacked the URL hash (/#work#work).
+    (window as Window & { __lenis?: Lenis }).__lenis = lenis;
 
     let raf = 0;
     let running = false;
@@ -83,6 +86,7 @@ export function SmoothScroll() {
       window.removeEventListener("pointerdown", wake);
       window.removeEventListener("click", wake);
       window.removeEventListener("resize", wake);
+      delete (window as Window & { __lenis?: Lenis }).__lenis;
       lenis.destroy();
     };
   }, []);
