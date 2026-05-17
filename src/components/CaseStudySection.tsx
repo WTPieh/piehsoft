@@ -9,6 +9,7 @@ import {
   SiSentry,
 } from "@icons-pack/react-simple-icons";
 import type { CaseSection } from "@/lib/projects";
+import { Reveal } from "@/components/Reveal";
 
 const BRAND_ICONS: Record<
   string,
@@ -33,7 +34,9 @@ export function CaseStudySection({ section }: { section: CaseSection }) {
       id={section.id}
       className="border-t border-border scroll-mt-40 py-20 sm:py-24"
     >
-      <div className="mx-auto max-w-6xl px-6 sm:px-10">{renderBody(section)}</div>
+      <Reveal className="mx-auto max-w-6xl px-6 sm:px-10">
+        {renderBody(section)}
+      </Reveal>
     </section>
   );
 }

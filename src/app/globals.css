@@ -241,3 +241,42 @@ html.lenis body {
 .lenis.lenis-stopped {
   overflow: clip;
 }
+
+/* ---- Scroll: smooth anchor + reveal-on-enter --------------------- */
+
+/* Non-Lenis devices (low-perf) still get smooth #link scrolling.
+   Lenis (high-perf) sets `scroll-behavior:auto !important` and handles
+   it itself; reduced-motion keeps the default `auto` (instant). */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+/* Anchor targets clear the fixed header on native jumps (Lenis uses
+   its own offset). :where() = zero specificity, so a section's own
+   scroll-mt-* utility (e.g. case studies' scroll-mt-40) still wins. */
+:where(section[id]) {
+  scroll-margin-top: 6rem;
+}
+
+/* Scroll-reveal: content fades + rises in as it enters view. Opacity +
+   transform via transition; end state has transform:none so nothing
+   lingers. Reduced-motion → instant, no transform. */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

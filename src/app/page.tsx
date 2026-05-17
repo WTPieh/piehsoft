@@ -1,5 +1,6 @@
 import { ProjectCard } from "@/components/ProjectCard";
 import { HeroBackground } from "@/components/HeroBackground";
+import { Reveal } from "@/components/Reveal";
 import { projects } from "@/lib/projects";
 
 export default function HomePage() {
@@ -124,14 +125,16 @@ export default function HomePage() {
         </div>
         <div className="relative z-10 mx-auto max-w-6xl px-6 sm:px-10 pb-16">
           {projects.map((p, i) => (
-            <ProjectCard key={p.id} project={p} index={i} />
+            <Reveal key={p.id} delay={i * 80}>
+              <ProjectCard project={p} index={i} />
+            </Reveal>
           ))}
         </div>
       </section>
 
       {/* About */}
       <section id="about" className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-6 sm:px-10 py-24 grid grid-cols-12 gap-y-10 sm:gap-x-10">
+        <Reveal className="mx-auto max-w-6xl px-6 sm:px-10 py-24 grid grid-cols-12 gap-y-10 sm:gap-x-10">
           <div className="col-span-12 sm:col-span-4">
             <p className="font-mono-tag text-subtle">About</p>
             <h2 className="font-display text-4xl sm:text-5xl tracking-tight mt-3">
@@ -160,12 +163,12 @@ export default function HomePage() {
               PiehSoft does best.
             </p>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* Capabilities */}
       <section id="capabilities" className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-6 sm:px-10 py-20">
+        <Reveal className="mx-auto max-w-6xl px-6 sm:px-10 py-20">
           <p className="font-mono-tag text-subtle mb-10">What we do</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
             {[
@@ -191,12 +194,12 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* Contact */}
       <section id="contact">
-        <div className="mx-auto max-w-6xl px-6 sm:px-10 py-28">
+        <Reveal className="mx-auto max-w-6xl px-6 sm:px-10 py-28">
           <p className="font-mono-tag text-subtle">Contact</p>
           <h2 className="font-display text-5xl sm:text-7xl tracking-tight mt-3 max-w-3xl leading-[1]">
             Have an app that works,{" "}
@@ -224,7 +227,7 @@ export default function HomePage() {
             scope. Standard contracts run 6–10 weeks; longer retainers available
             for ongoing product work.
           </p>
-        </div>
+        </Reveal>
       </section>
     </>
   );

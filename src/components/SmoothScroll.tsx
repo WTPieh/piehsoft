@@ -25,6 +25,10 @@ export function SmoothScroll() {
       wheelMultiplier: 1,
       smoothWheel: true,
       syncTouch: false, // native touch = thumb has full priority
+      // Same-page #links (pill/tab nav, hero "See the work ↓") ease-
+      // scroll smoothly. Offset clears the fixed header + sticky pill so
+      // the target heading isn't tucked underneath.
+      anchors: { offset: -110 },
     });
 
     let raf = 0;
