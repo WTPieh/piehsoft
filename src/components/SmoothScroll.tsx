@@ -63,6 +63,11 @@ export function SmoothScroll() {
       running = true;
       raf = requestAnimationFrame(tick);
     };
+    // AnchorScroll calls lenis.scrollTo() then this — required because
+    // its capture-phase stopImmediatePropagation kills the click→wake,
+    // so without it the programmatic scroll never gets rAF ticks (the
+    // "one click behind" bug).
+    (window as Window & { __lenisWake?: () => void }).__lenisWake = wake;
 
     // Resume on any input that can scroll, on anchor clicks
     // (pointerdown/click — Lenis intercepts these for smooth #links),
@@ -86,7 +91,12 @@ export function SmoothScroll() {
       window.removeEventListener("pointerdown", wake);
       window.removeEventListener("click", wake);
       window.removeEventListener("resize", wake);
-      delete (window as Window & { __lenis?: Lenis }).__lenis;
+      const w = window as Window & {
+        __lenis?: Lenis;
+        __lenisWake?: () => void;
+      };
+      delete w.__lenis;
+      delete w.__lenisWake;
       lenis.destroy();
     };
   }, []);

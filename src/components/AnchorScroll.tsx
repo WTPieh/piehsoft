@@ -47,7 +47,11 @@ export function AnchorScroll() {
       e.preventDefault();
       e.stopImmediatePropagation();
 
-      const lenis = (window as Window & { __lenis?: Lenis }).__lenis;
+      const w = window as Window & {
+        __lenis?: Lenis;
+        __lenisWake?: () => void;
+      };
+      const lenis = w.__lenis;
       if (lenis && !reduce) {
         // Deliberate, even smooth scroll (not a fast snap) regardless of
         // distance — fixed duration + easeInOutCubic, not the wheel lerp.
@@ -57,6 +61,9 @@ export function AnchorScroll() {
           easing: (t) =>
             t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
         });
+        // Start the idle-gated rAF loop NOW (our stopImmediatePropagation
+        // killed the click→wake) so this scroll actually animates.
+        w.__lenisWake?.();
       } else {
         el.scrollIntoView({
           behavior: reduce ? "auto" : "smooth",
