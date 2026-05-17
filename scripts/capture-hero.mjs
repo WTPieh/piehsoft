@@ -6,6 +6,7 @@
 import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
+import sharp from "sharp";
 
 const origin = process.argv[2] ?? "http://localhost:3100";
 const outDir = resolve(process.cwd(), "public");
@@ -24,8 +25,8 @@ const browser = await chromium.launch();
 for (const { path, key } of TARGETS)
 for (const theme of ["light", "dark"]) {
   const ctx = await browser.newContext({
-    viewport: { width: 1600, height: 1100 },
-    deviceScaleFactor: 1,
+    viewport: { width: 1728, height: 1180 },
+    deviceScaleFactor: 2,
     colorScheme: theme,
   });
   const page = await ctx.newPage();
@@ -63,9 +64,15 @@ for (const theme of ["light", "dark"]) {
   });
   await page.waitForTimeout(150);
 
-  const out = resolve(outDir, `${key}-${theme}.jpg`);
-  await page.screenshot({ path: out, type: "jpeg", quality: 82, clip });
-  console.log(`wrote ${key}-${theme}.jpg (${clip.width}x${clip.height})`);
+  // Lossless PNG capture (DSR 2 → ~2x pixels), then a high-quality WebP.
+  // WebP keeps the fine grain noise far better than JPEG at a fraction
+  // of the size of PNG.
+  const png = await page.screenshot({ type: "png", clip });
+  const out = resolve(outDir, `${key}-${theme}.webp`);
+  await sharp(png)
+    .webp({ quality: 92, effort: 6, smartSubsample: true })
+    .toFile(out);
+  console.log(`wrote ${key}-${theme}.webp (${clip.width}x${clip.height} @2x)`);
   await ctx.close();
 }
 

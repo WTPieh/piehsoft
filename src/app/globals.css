@@ -142,3 +142,50 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* ---- Route transition + loading ---------------------------------- */
+
+/* Premium page-enter: a soft fade with a small settle. Opacity +
+   transform only — GPU-composited, jank-free on every device. Runs once
+   per navigation (template.tsx remounts with a fresh key). */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.994);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+.page-enter {
+  /* `backwards` (not `both`/`forwards`): the transform is applied only
+     up to the end of the animation, then the element reverts to no
+     transform — so it never leaves a lingering containing block that
+     would break sticky/fixed descendants (e.g. the pill nav). */
+  animation: pageEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* Branded route loader — a thin rotating arc in the accent color. */
+@keyframes loaderSpin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+.route-loader {
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  border: 2px solid color-mix(in oklab, var(--foreground) 18%, transparent);
+  border-top-color: var(--foreground);
+  animation: loaderSpin 0.7s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+  .route-loader {
+    animation-duration: 1.6s;
+  }
+}

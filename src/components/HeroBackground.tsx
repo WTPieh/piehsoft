@@ -210,7 +210,7 @@ export function HeroBackground({
           present underneath so there is never a blank hero, even mid-frame
           or if the shader throws. */}
       <img
-        src={`/${fallbackKey}-${theme}.jpg`}
+        src={`/${fallbackKey}-${theme}.webp`}
         alt=""
         aria-hidden
         className="absolute inset-0 h-full w-full object-cover"
