@@ -15,6 +15,7 @@
     "@icons-pack/react-simple-icons": "^13.13.0",
     "@paper-design/shaders-react": "^0.0.72",
     "next": "16.2.6",
+    "next-view-transitions": "^0.3.5",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },

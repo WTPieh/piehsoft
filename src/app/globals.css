@@ -145,25 +145,29 @@ body {
 
 /* ---- Route transition + loading ---------------------------------- */
 
-/* Premium page-enter: a soft fade with a small settle. Opacity +
-   transform only — GPU-composited, jank-free on every device. Runs once
-   per navigation (template.tsx remounts with a fresh key). */
-@keyframes pageEnter {
+/* Native View Transitions (via next-view-transitions). Refine the
+   default root crossfade into a slower, eased dissolve with a subtle
+   settle — premium feel between routes. */
+@keyframes vtFadeOut {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vtFadeIn {
   from {
     opacity: 0;
-    transform: translate3d(0, 12px, 0) scale(0.994);
+    transform: translate3d(0, 10px, 0) scale(0.992);
   }
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
   }
 }
-.page-enter {
-  /* `backwards` (not `both`/`forwards`): the transform is applied only
-     up to the end of the animation, then the element reverts to no
-     transform — so it never leaves a lingering containing block that
-     would break sticky/fixed descendants (e.g. the pill nav). */
-  animation: pageEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+::view-transition-old(root) {
+  animation: vtFadeOut 0.32s cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(root) {
+  animation: vtFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Branded route loader — a thin rotating arc in the accent color. */
@@ -182,7 +186,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-enter {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
     animation: none;
   }
   .route-loader {
