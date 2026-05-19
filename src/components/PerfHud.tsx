@@ -28,16 +28,15 @@ export function PerfHud() {
   const enabled = useEnabled();
   const tier = usePerfTier();
   const [fps, setFps] = useState(0);
-  const forced =
-    typeof window !== "undefined"
-      ? (() => {
-          try {
-            return localStorage.getItem("pf");
-          } catch {
-            return null;
-          }
-        })()
-      : null;
+  const ls = (k: string) => {
+    try {
+      return typeof window !== "undefined" ? localStorage.getItem(k) : null;
+    } catch {
+      return null;
+    }
+  };
+  const forced = ls("pf");
+  const lenisOff = ls("lenis") === "off";
   const frames = useRef<number[]>([]);
 
   useEffect(() => {
@@ -135,6 +134,28 @@ export function PerfHud() {
           Auto
         </button>
       </div>
+      <button
+        onClick={() => {
+          try {
+            if (lenisOff) localStorage.removeItem("lenis");
+            else localStorage.setItem("lenis", "off");
+          } catch {}
+          location.reload();
+        }}
+        style={{
+          marginTop: 4,
+          width: "100%",
+          padding: "3px 6px",
+          fontSize: 10,
+          border: "1px solid #555",
+          borderRadius: 4,
+          background: lenisOff ? "#fbbf24" : "transparent",
+          color: lenisOff ? "#000" : "#fff",
+          cursor: "pointer",
+        }}
+      >
+        Lenis: {lenisOff ? "OFF (native)" : "on"}
+      </button>
     </div>
   );
 }

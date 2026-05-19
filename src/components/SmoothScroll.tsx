@@ -18,6 +18,14 @@ export function SmoothScroll() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (document.documentElement.dataset.perf !== "high") return;
+    // Live kill-switch for A/B testing on the deployed site (no rebuild):
+    //   localStorage.lenis = 'off'  -> native scroll
+    //   remove it (or the HUD button) -> back on
+    // Native scroll removes the Lenis/canvas-rAF phase gap that tears the
+    // glass bleed seam during a fast/bouncy scroll.
+    try {
+      if (localStorage.getItem("lenis") === "off") return;
+    } catch {}
 
     const lenis = new Lenis({
       lerp: 0.2, // snappier: closes ~20%/frame → tracks input, short tail
