@@ -18,14 +18,18 @@ export function SmoothScroll() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (document.documentElement.dataset.perf !== "high") return;
-    // Live kill-switch for A/B testing on the deployed site (no rebuild):
-    //   localStorage.lenis = 'off'  -> native scroll
-    //   remove it (or the HUD button) -> back on
-    // Native scroll removes the Lenis/canvas-rAF phase gap that tears the
-    // glass bleed seam during a fast/bouncy scroll.
+    // Lenis is OFF by default. On-device testing (Safari/ProMotion)
+    // showed its per-frame fractional-px transform of the whole document
+    // forces the glass strips' backdrop-filter to re-rasterize every
+    // frame and desyncs the raw-scrollY fixed shader canvas from the
+    // Lenis-eased strip — tearing the bleed seam and dipping to ~49fps.
+    // Native scroll = stable backdrop, in-phase canvas, "sweet FPS".
+    // Opt back in (HUD button / localStorage.lenis='on') to compare.
     try {
-      if (localStorage.getItem("lenis") === "off") return;
-    } catch {}
+      if (localStorage.getItem("lenis") !== "on") return;
+    } catch {
+      return;
+    }
 
     const lenis = new Lenis({
       lerp: 0.2, // snappier: closes ~20%/frame → tracks input, short tail

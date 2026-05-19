@@ -36,7 +36,7 @@ export function PerfHud() {
     }
   };
   const forced = ls("pf");
-  const lenisOff = ls("lenis") === "off";
+  const lenisOn = ls("lenis") === "on";
   const frames = useRef<number[]>([]);
 
   useEffect(() => {
@@ -137,8 +137,8 @@ export function PerfHud() {
       <button
         onClick={() => {
           try {
-            if (lenisOff) localStorage.removeItem("lenis");
-            else localStorage.setItem("lenis", "off");
+            if (lenisOn) localStorage.removeItem("lenis");
+            else localStorage.setItem("lenis", "on");
           } catch {}
           location.reload();
         }}
@@ -149,12 +149,12 @@ export function PerfHud() {
           fontSize: 10,
           border: "1px solid #555",
           borderRadius: 4,
-          background: lenisOff ? "#fbbf24" : "transparent",
-          color: lenisOff ? "#000" : "#fff",
+          background: lenisOn ? "#4ade80" : "#fbbf24",
+          color: "#000",
           cursor: "pointer",
         }}
       >
-        Lenis: {lenisOff ? "OFF (native)" : "on"}
+        Lenis: {lenisOn ? "on" : "OFF (native, default)"}
       </button>
     </div>
   );
