@@ -62,7 +62,13 @@
     var(--background) 100%
   );
 }
-:root[data-perf="high"] {
+/* 'medium' = static gradient screenshot but the SAME full glass blur as
+   'high'. Because the source behind the blur is now a static image (not
+   the animated WebGL canvas), the compositor caches the blurred layer
+   instead of recomputing it every frame — premium glass, no re-draw
+   cost. Only 'low' (above) drops blur entirely. */
+:root[data-perf="high"],
+:root[data-perf="medium"] {
   --glass-filter: blur(4px) saturate(1.5);
   --glass-filter-strong: blur(12px) saturate(1.5);
   /* Case-study bleed: keep the blur but desaturate + darken so the vibrant

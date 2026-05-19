@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { PALETTE, type Theme } from "@/lib/heroPalette";
 import { useSetHeroParams } from "@/components/HeroShader";
+import { usePerfTier } from "@/lib/perfTier";
 
 // Thin per-page hero. The live WebGL shader is NOT here anymore — it's a
 // single persistent instance in the root layout (see HeroShader) that
@@ -14,8 +15,6 @@ import { useSetHeroParams } from "@/components/HeroShader";
 // On low-perf / reduced-motion the persistent shader renders nothing, so
 // the static image below is the whole hero — unchanged behaviour.
 
-const useIsoLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function useTheme(): Theme {
   const [theme, setTheme] = useState<Theme>("light");
@@ -31,14 +30,6 @@ function useTheme(): Theme {
     return () => observer.disconnect();
   }, []);
   return theme;
-}
-
-function useShaderCapable(): boolean {
-  const [capable, setCapable] = useState(false);
-  useIsoLayoutEffect(() => {
-    setCapable(document.documentElement.dataset.perf === "high");
-  }, []);
-  return capable;
 }
 
 type Props = {
@@ -67,7 +58,13 @@ export function HeroBackground({
   fallbackKey = "hero",
 }: Props = {}) {
   const theme = useTheme();
-  const capable = useShaderCapable();
+  const tier = usePerfTier();
+  // 'high' = live shader is the hero (don't render the in-section image,
+  // it would occlude the fixed canvas). 'medium'/'low' = the static
+  // screenshot IS the hero. Glass atmosphere (bleed mask + blur strips)
+  // stays on for medium too — only 'low' drops it.
+  const isHigh = tier === "high";
+  const hasGlass = tier !== "low";
   const base = PALETTE[theme];
 
   // Publish this page's params to the persistent shader (it morphs;
@@ -84,9 +81,10 @@ export function HeroBackground({
     fallbackKey,
   });
 
-  // Bleed only on high-perf (glass atmosphere by design). Low-perf: no
-  // mask — image ends at hero bounds, solid bg immediately after.
-  const bleeding = capable && bleedBelow > 0;
+  // Bleed wherever there's glass (high + medium): the hero atmosphere
+  // reads under the blur strip. Low-perf: no mask — image ends at hero
+  // bounds, solid bg immediately after.
+  const bleeding = hasGlass && bleedBelow > 0;
   const wrapperStyle: React.CSSProperties = bleeding
     ? {
         bottom: `-${bleedBelow}px`,
@@ -107,10 +105,11 @@ export function HeroBackground({
       style={wrapperStyle}
     >
       {/* Static fallback — pixel-exact screenshot of the shader, per
-          theme. ONLY on low-perf: it IS the hero there. On high-perf the
-          persistent shader (fixed, z-index:-1) is the hero; rendering
-          this image would sit at z-0 in the section and occlude it. */}
-      {!capable && (
+          theme. On medium/low it IS the hero (medium keeps full glass
+          blur over it; the static source makes that blur cacheable). On
+          high the persistent fixed canvas is the hero; rendering this
+          image would sit at z-0 in the section and occlude it. */}
+      {!isHigh && (
         <div
           aria-hidden
           className="hero-fallback absolute inset-0 h-full w-full"

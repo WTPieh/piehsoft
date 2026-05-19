@@ -1,6 +1,7 @@
 "use client";
 
 import { GrainGradient } from "@paper-design/shaders-react";
+import { getShaderNoiseTexture } from "@paper-design/shaders";
 import {
   Component,
   createContext,
@@ -13,6 +14,9 @@ import {
   useState,
 } from "react";
 import { PALETTE, deriveColors, type Theme } from "@/lib/heroPalette";
+import { usePerfTier } from "@/lib/perfTier";
+import { PerfProbe } from "@/components/PerfProbe";
+import { PerfHud } from "@/components/PerfHud";
 
 // Runs before the browser paints (client). Lets the persistent canvas
 // decide shader-vs-nothing before a frame is shown.
@@ -72,12 +76,46 @@ function useTheme(): Theme {
   return theme;
 }
 
-function useShaderCapable(): boolean {
-  const [capable, setCapable] = useState(false);
-  useIsoLayoutEffect(() => {
-    setCapable(document.documentElement.dataset.perf === "high");
+// @paper-design/shaders-react only awaits image loads for uniforms given
+// as URL strings; the grain noise is passed as a pre-made <img> with a
+// data: URL, so it's NOT awaited. The ShaderMount constructor then
+// synchronously throws "image for uniform u_noiseTexture must be fully
+// loaded" if that image hasn't decoded yet, and because the lib's
+// initShader is an uncaught async fn it surfaces as an unhandledRejection
+// AND the animated shader silently fails to start that session (only
+// works after a refresh once the data URL is cached). We pre-decode the
+// exact same data: URL here; the browser caches decoded data URLs by
+// src, so the lib's own new Image() is `complete` by the time it mounts.
+function useNoiseReady(): boolean {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const done = () => {
+      if (!cancelled) setReady(true);
+    };
+    try {
+      const img = getShaderNoiseTexture();
+      if (img && img.complete && img.naturalWidth > 0) {
+        done();
+      } else if (img && typeof img.decode === "function") {
+        img.decode().then(done, done);
+      } else if (img) {
+        img.addEventListener("load", done, { once: true });
+        img.addEventListener("error", done, { once: true });
+      } else {
+        done();
+      }
+    } catch {
+      done();
+    }
+    // Safety: never gate the hero forever on a decode that never settles.
+    const t = setTimeout(done, 1500);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
   }, []);
-  return capable;
+  return ready;
 }
 
 class ShaderBoundary extends Component<
@@ -104,7 +142,11 @@ class ShaderBoundary extends Component<
  */
 function PersistentHeroCanvas({ params }: { params: HeroParams | null }) {
   const theme = useTheme();
-  const capable = useShaderCapable();
+  // Live WebGL canvas only on 'high'. On 'medium'/'low' this renders
+  // nothing and HeroBackground shows the pixel-exact static screenshot
+  // instead (medium keeps full glass blur over it; low drops blur).
+  const capable = usePerfTier() === "high";
+  const noiseReady = useNoiseReady();
   const containerRef = useRef<HTMLDivElement>(null);
   const metricsRef = useRef({ docTop: 0, height: 0, found: false });
   const [onScreen, setOnScreen] = useState(true);
@@ -233,6 +275,7 @@ function PersistentHeroCanvas({ params }: { params: HeroParams | null }) {
         }
       />
       <ShaderBoundary>
+        {noiseReady && (
         <GrainGradient
           colors={colors}
           colorBack={base.colorBack}
@@ -250,6 +293,7 @@ function PersistentHeroCanvas({ params }: { params: HeroParams | null }) {
             bottom: inset,
           }}
         />
+        )}
       </ShaderBoundary>
     </div>
   );
@@ -266,6 +310,8 @@ export function HeroShaderProvider({ children }: { children: ReactNode }) {
           z-10). Painting the canvas first (earlier in DOM, same z-0
           level) keeps it behind that whole content stacking context. */}
       <PersistentHeroCanvas params={params} />
+      <PerfProbe />
+      <PerfHud />
       {children}
     </HeroParamsContext.Provider>
   );

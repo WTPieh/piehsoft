@@ -58,19 +58,25 @@ const perfScript = `
     // Manual override for testing/screenshots: localStorage 'pf' = 'high'|'low'.
     var forced = null;
     try { forced = localStorage.getItem('pf'); } catch (e) {}
-    if (forced === 'high' || forced === 'low') {
+    if (forced === 'high' || forced === 'medium' || forced === 'low') {
       document.documentElement.setAttribute('data-perf', forced);
       return;
     }
     var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var ok = false;
-    if (!reduced) {
-      var c = document.createElement('canvas');
-      var a = { failIfMajorPerformanceCaveat: true };
-      var gl = c.getContext('webgl2', a) || c.getContext('webgl', a) || c.getContext('experimental-webgl', a);
-      ok = !!gl;
-    }
-    document.documentElement.setAttribute('data-perf', ok ? 'high' : 'low');
+    if (reduced) { document.documentElement.setAttribute('data-perf', 'low'); return; }
+    var c = document.createElement('canvas');
+    var a = { failIfMajorPerformanceCaveat: true };
+    var gl = c.getContext('webgl2', a) || c.getContext('webgl', a) || c.getContext('experimental-webgl', a);
+    if (!gl) { document.documentElement.setAttribute('data-perf', 'low'); return; }
+    // Capable of WebGL. Firefox-on-Android's backdrop-filter + WebGL
+    // compositing path is far weaker than Chrome's: an animated shader
+    // behind stacked blur strips drops frames there (Pixel/Firefox report).
+    // Start such devices at 'medium' (static gradient + full glass, no
+    // per-frame re-blur). Everyone else starts 'high'; the runtime FPS
+    // probe (PerfProbe) demotes high->medium if it still can't hold frame.
+    var ua = navigator.userAgent;
+    var firefoxAndroid = ua.indexOf('Firefox') !== -1 && ua.indexOf('Android') !== -1;
+    document.documentElement.setAttribute('data-perf', firefoxAndroid ? 'medium' : 'high');
   } catch (e) {
     document.documentElement.setAttribute('data-perf', 'low');
   }
