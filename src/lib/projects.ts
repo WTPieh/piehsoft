@@ -78,6 +78,18 @@ export type CaseSection =
       imageSide?: "left" | "right";
     }
   | {
+      kind: "before-after";
+      id: string;
+      label: string;
+      heading: string;
+      lede?: string;
+      beforeImage?: string;
+      afterImage?: string;
+      beforeSubLabel?: string;
+      afterSubLabel?: string;
+      pairs?: { before: string; after: string; caption?: string }[];
+    }
+  | {
       kind: "cta";
       id: string;
       label: string;
@@ -130,6 +142,31 @@ export const projects: Project[] = [
     tech: ["Swift", "SwiftUI", "Firebase", "Cloud Functions"],
     brand: { from: "#3a2812", to: "#8a4d1f" },
     sections: [
+      {
+        kind: "before-after",
+        id: "before-after",
+        label: "The Redesign",
+        heading: "Before and after.",
+        lede: "Same product, two codebases — the legacy React Native build beside the native SwiftUI rewrite.",
+        beforeSubLabel: "Legacy · React Native",
+        afterSubLabel: "Native · SwiftUI",
+        pairs: [
+          {
+            before:
+              "https://media.williampieh.com/projects/hornscore/photos/old-profile.png",
+            after:
+              "https://media.williampieh.com/projects/hornscore/photos/modern-profile.png",
+            caption: "User profile",
+          },
+          // Add additional pairs here — e.g. home feed, scoring tool, comments.
+          // Example shape:
+          // {
+          //   before: "https://media.williampieh.com/projects/hornscore/photos/old-home.png",
+          //   after:  "https://media.williampieh.com/projects/hornscore/photos/home-feed.png",
+          //   caption: "Home feed",
+          // },
+        ],
+      },
       {
         kind: "prose",
         id: "product",

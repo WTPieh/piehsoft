@@ -10,6 +10,7 @@ import {
 } from "@icons-pack/react-simple-icons";
 import type { CaseSection } from "@/lib/projects";
 import { Reveal } from "@/components/Reveal";
+import { BeforeAfterComparison } from "@/components/BeforeAfterComparison";
 
 const BRAND_ICONS: Record<
   string,
@@ -461,6 +462,29 @@ function renderBody(section: CaseSection) {
           >
             <ImageBlock image={section.image} />
           </div>
+        </div>
+      );
+    }
+
+    case "before-after": {
+      const hasSingle = section.beforeImage && section.afterImage;
+      const hasPairs = section.pairs && section.pairs.length > 0;
+      if (!hasSingle && !hasPairs) return null;
+      return (
+        <div className="space-y-14">
+          <SectionHeader
+            label={section.label}
+            heading={section.heading}
+            lede={section.lede}
+            align="center"
+          />
+          <BeforeAfterComparison
+            beforeImage={section.beforeImage}
+            afterImage={section.afterImage}
+            beforeSubLabel={section.beforeSubLabel}
+            afterSubLabel={section.afterSubLabel}
+            pairs={section.pairs}
+          />
         </div>
       );
     }
